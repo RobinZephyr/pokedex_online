@@ -18,7 +18,7 @@ function SearchBar() {
       <div className="h-full flex item-center space-x-2">
         <input
           placeholder="Search "
-          className=" rounded-sm tracking-widest h-8   p-1 w-60 mina-regular shadow-sm "
+          className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
         />
 
         <button className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600">

@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      gridTemplateColumns: {
+        "5": "repeat(5, minmax(0, 1fr))",
+      },
       colors: {
         pkdBlue: "#10112B",
         typeNormal: "#C1BCB6",
@@ -91,6 +94,50 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      width: {
+        "5%": "5%",
+        "10%": "10%",
+        "15%": "15%",
+        "20%": "20%",
+        "25%": "25%",
+        "30%": "30%",
+        "40%": "40%",
+        "50%": "50%",
+        "60%": "60%",
+        "65%": "65%",
+        "70%": "70%",
+        "75%": "75%",
+        "80%": "80%",
+        "85%": "85%",
+        "90%": "90%",
+        "100%": "100%",
+      },
+      height: {
+        "5%": "5%",
+        "10%": "10%",
+        "20%": "20%",
+        "25%": "25%",
+        "30%": "30%",
+        "40%": "40%",
+        "43%": "43%",
+        "50%": "50%",
+        "60%": "60%",
+        "70%": "70%",
+        "75%": "75%",
+        "80%": "80%",
+        "90%": "90%",
+        "100%": "100%",
+      },
+      screens: {
+        xs: "320px", //  Mobile View
+        sm: "376px", //  Mobile View
+        smd: "576px", //  Mobile View
+        md: "768px", // Tablet View
+        lg: "992px", //Laptop View
+        xl: "1280px", // Laptop
+        "2xl": "1536px", // Desktop
+        "3xl": "1900px", // Desktop
       },
     },
   },

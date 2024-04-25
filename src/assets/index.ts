@@ -39,4 +39,6 @@ const pokeType = {
   steel,
 };
 
+const pokeTypeBG = {};
+
 export { wooden_background, pokeType };
