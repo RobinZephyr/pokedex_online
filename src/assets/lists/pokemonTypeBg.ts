@@ -16,8 +16,13 @@ import dark from "../images/type backgrounds/dark.png";
 import dragon from "../images/type backgrounds/dragon.png";
 import fairy from "../images/type backgrounds/fairy.png";
 import steel from "../images/type backgrounds/steel.png";
+import { StaticImageData } from "next/image";
 
-export const pokemonTypeBg = {
+interface PokemonTypeBg {
+  [key: string]: StaticImageData;
+}
+
+export const pokemonTypeBg: PokemonTypeBg = {
   normal,
   fire,
   water,

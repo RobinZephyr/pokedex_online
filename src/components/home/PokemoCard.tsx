@@ -2,10 +2,22 @@ import React from "react";
 import Image from "next/image";
 import { pokemonTypeBg } from "../../assets/lists/pokemonTypeBg";
 import { pokeType } from "../../assets/index.ts";
-function PokemonCard({ pokemon }) {
+
+interface Pokemon {
+  name: string;
+  dexNumber: string;
+  types: { type: { name: string } }[];
+  spriteDisplay: string;
+}
+
+interface PokemonCardProps {
+  pokemon: Pokemon;
+}
+
+function PokemonCard({ pokemon }: PokemonCardProps) {
   const typeImageUrl = pokemonTypeBg[pokemon.types[0].type.name.toLowerCase()];
 
-  function capitalLetter(string) {
+  function capitalLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
@@ -24,7 +36,8 @@ function PokemonCard({ pokemon }) {
             <div className="w-full flex items-center pt-[.5px] whitespace-nowrap font-bold justify-center">
               <div> {capitalLetter(pokemon.name)}</div>
             </div>
-            <div className="w-20 space-x-1  text-xs text-center flex">
+            {/* Types */}
+            <div className="w-20 space-x-1 text-xs text-center flex justify-center">
               {pokemon.types.map((type, index) => (
                 <div
                   key={index}
@@ -34,7 +47,7 @@ function PokemonCard({ pokemon }) {
                   <Image
                     src={pokeType[type.type.name]}
                     alt={type.type.name}
-                    className="w-5 h-5  mr-1 object-cover"
+                    className="w-5 h-5 mr-1 object-cover"
                   />
                 </div>
               ))}

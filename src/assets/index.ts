@@ -17,8 +17,12 @@ import dark from "../assets/images/type icons/dark.png";
 import dragon from "../assets/images/type icons/dragon.png";
 import steel from "../assets/images/type icons/steel.png";
 import fairy from "../assets/images/type icons/fairy.png";
+import { StaticImageData } from "next/image";
 
-const pokeType = {
+interface pokeTypeKeys {
+  [key: string]: StaticImageData;
+}
+const pokeType: pokeTypeKeys = {
   normal,
   fire,
   water,
@@ -38,7 +42,5 @@ const pokeType = {
   fairy,
   steel,
 };
-
-const pokeTypeBG = {};
 
 export { wooden_background, pokeType };
