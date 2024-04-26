@@ -18,7 +18,7 @@ function SearchBar() {
       <div className="h-full flex item-center space-x-2">
         <input
           placeholder="Search "
-          className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
+          className=" rounded-sm tracking-widest h-8 pt-2  p-1 w-full md:w-60 mina-regular shadow-sm "
         />
 
         <button className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600">
@@ -39,12 +39,20 @@ function SearchBar() {
             </option>
           ))}
         </select>
-        {selectedType !== "Type" && (
+        {selectedType !== "Type" ? (
           <Image
             src={typeIcons[selectedType.toLowerCase()]}
             alt="Type"
+            title={selectedType}
             className="w-8 h-8 rounded-md shadow-md"
           />
+        ) : (
+          <div
+            title="Choose a Type"
+            className="hover:cursor-default pt-1 w-8 h-8 text-white mina-regular text-lg rounded-md bg-gray-500 shadow-md flex justify-center items-center"
+          >
+            ?
+          </div>
         )}
       </div>
     </div>

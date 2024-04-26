@@ -59,8 +59,7 @@ function PokemonCard({ pokemon }: PokemonCardProps) {
               <Image
                 src={typeImageUrl} // Use typeImageUrl as the src
                 alt={pokemon.types[0].type.name}
-                layout="fill"
-                objectFit="cover"
+                className="object-cover"
               />
             </div>
           )}

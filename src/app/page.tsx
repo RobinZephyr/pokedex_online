@@ -7,7 +7,12 @@ import { IoIosArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { TbArrowBackUpDouble } from "react-icons/tb";
-
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { pokeType } from "../assets/index.ts";
+import { StaticImageData } from "next/image";
+import { wooden_background } from "@/assets";
+import { PokemonTypes } from "@/assets/lists/pokemonType";
+const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
 export default function Home() {
   const [listPokemon, setListPokemon] = useState([]);
 
@@ -48,7 +53,7 @@ export default function Home() {
         setLoading(false);
       }
     }
-
+    console.log("initialfetch", data);
     setFetchData(data);
   };
 
@@ -154,7 +159,6 @@ export default function Home() {
       offset: index * 10,
     }));
 
-    console.log(options);
     setPages(options);
   };
 
@@ -189,6 +193,7 @@ export default function Home() {
         }
       }
       setLoading(false);
+      console.log("pokemon details", pokemonDetails);
       setListPokemon(pokemonDetails);
     };
 
@@ -197,6 +202,50 @@ export default function Home() {
     }
   }, [fetchData]);
 
+  const [selectedType, setSelectedType] = useState("Type");
+  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedType(event.target.value);
+  };
+
+  // Searchbar
+  const [searchTermShow, setSearchTermShow] = useState("");
+  const [searchTermToSearch, setSearchTermToSearch] = useState("");
+  const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    const lowerCase = query.toLowerCase();
+    setSearchTermToSearch(lowerCase);
+    setSearchTermShow(query);
+  };
+
+  const handleSearchButtonClick = async (event: {
+    preventDefault: () => void;
+  }) => {
+    event.preventDefault();
+    if (searchTermToSearch === "") {
+      initialFetch();
+      return;
+    }
+
+    console.log(searchTermToSearch);
+    setLoading(true);
+    const response = await fetch(
+      `https://pokeapi.co/api/v2/pokemon/${searchTermToSearch}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch Pokemon data");
+    }
+    setLoading(false);
+    const data = await response.json();
+
+    const formattedOrder = String(data.id).padStart(3, "0");
+
+    data.dexNumber = formattedOrder;
+    data.spriteDisplay = data.sprites.other["official-artwork"].front_default;
+
+    setListPokemon([data]);
+    console.log(data.name);
+  };
+
   return (
     <div>
       <Header />
@@ -204,99 +253,95 @@ export default function Home() {
         style={{ zIndex: 10 }}
         className="px-[10px] md:px-[50px] mt-[50px] w-full h-full"
       >
-        <SearchBar />
-
-        <div className="w-full max-h-screen h-screen flex items-center justify-center">
-          {loading ? (
-            <div className="flex justify-center w-full item-center ">
-              <div className="flex items-center text-[10rem] text-white">
-                <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
-              </div>
-            </div>
-          ) : (
-            <div className="">
-              <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
-                {" "}
-                {listPokemon.map((pokemon) => (
-                  <PokemonCard key={pokemon.name} pokemon={pokemon} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="absolute h-12 w-full mt-10">
-        <div className="bg-white flex justify-center inset h-full w-full  bottom-0 flex items-center ">
-          <div className="space-x-2 bg-pkdBlue bg-opacity-50 p-1 rounded-sm shadow-md flex items-center h-fit">
-            <button
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              onClick={handleMaxPrevPage}
-              disabled={currentPage === "1"} // Disable the button based on currentPage value
-            >
-              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
-                <TbArrowBackUpDouble />
-              </div>
-            </button>
+        <div className="w-fit bg-pkdBlue bg-opacity-60 rounded-sm p-2 flex items-center space-x-4 ">
+          <div className="h-full flex item-center space-x-2">
+            <input
+              onChange={handleSearchInput}
+              value={searchTermShow}
+              placeholder="Search "
+              className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
+            />
 
             <button
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              onClick={handlePrevPage}
-              disabled={currentPage === "1"} // Disable the button based on currentPage value
+              type="button"
+              onClick={handleSearchButtonClick}
+              className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600"
             >
-              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
-                <IoIosArrowBack />
-              </div>
-            </button>
-
-            <div className="w-10 text-center mina-regular bg-white rounded-sm shadow-md flex items-center justify-center pt-[.5px]">
-              <select
-                value={currentPage}
-                className="text-center"
-                onChange={(e) => handlePageChange(Number(e.target.value))}
-              >
-                {pages.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                offset === 1020 ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              disabled={offset === 1020}
-              onClick={handleNextPage}
-            >
-              <div
-                style={{ transform: "rotate(180deg)" }}
-                className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg"
-              >
-                <IoIosArrowBack />
-              </div>
-            </button>
-
-            <button
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                offset === 1020 ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              disabled={offset === 1020}
-              onClick={handleMaxNextPage}
-            >
-              <div
-                style={{ transform: "rotate(180deg)" }}
-                className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg"
-              >
-                <TbArrowBackUpDouble />
-              </div>
+              <FaMagnifyingGlass />
             </button>
           </div>
+
+          <div className=" flex space-x-2 ">
+            <select
+              className="h-8 rounded-md mina-regular flex items-center"
+              value={selectedType}
+              onChange={handleTypeChange}
+            >
+              <option>Type</option>
+              {PokemonTypes.map((type, index) => (
+                <option key={index} value={type.name}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+            {selectedType !== "Type" ? (
+              <Image
+                src={typeIcons[selectedType.toLowerCase()]}
+                alt="Type"
+                title={selectedType}
+                className="w-8 h-8 rounded-md shadow-md"
+              />
+            ) : (
+              <div
+                title="Choose a Type"
+                className="hover:cursor-default pt-1 w-8 h-8 text-white mina-regular text-lg rounded-md bg-gray-500 shadow-md flex justify-center items-center"
+              >
+                ?
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+      <div className="w-full  flex items-center justify-center min-h-[30rem]">
+        {loading ? (
+          <div className="flex justify-center w-full item-center ">
+            <div className="flex items-center text-[10rem] text-white">
+              <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+            </div>
+          </div>
+        ) : (
+          <div className="">
+            <div
+              className={`w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5`}
+            >
+              {listPokemon.map((pokemon) => (
+                <div
+                  key={pokemon.name}
+                  className={` ${
+                    listPokemon.length === 1
+                      ? "col-span-2  md:col-span-3 lg:col-span-5 flex justify-center"
+                      : "col-span-1"
+                  }`}
+                >
+                  <PokemonCard pokemon={pokemon} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Pagination */}
+      <div className="absolute h-12 w-full mt-10">
+        <Pagination
+          currentPage={currentPage}
+          handleNextPage={handleNextPage}
+          handleMaxNextPage={handleMaxNextPage}
+          handlePrevPage={handlePrevPage}
+          handleMaxPrevPage={handleMaxPrevPage}
+          handlePageChange={handlePageChange}
+          pages={pages}
+          offset={offset}
+        />
       </div>
     </div>
   );
