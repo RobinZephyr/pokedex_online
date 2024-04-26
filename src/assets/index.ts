@@ -19,10 +19,7 @@ import steel from "../assets/images/type icons/steel.png";
 import fairy from "../assets/images/type icons/fairy.png";
 import { StaticImageData } from "next/image";
 
-interface pokeTypeKeys {
-  [key: string]: StaticImageData;
-}
-const pokeType: pokeTypeKeys = {
+const pokeType: { [key: string]: StaticImageData } = {
   normal,
   fire,
   water,

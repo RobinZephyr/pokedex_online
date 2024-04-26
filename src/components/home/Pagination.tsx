@@ -11,16 +11,17 @@ const Pagination = ({
   handlePageChange,
   pages,
   offset,
+  lastPage,
 }) => {
   return (
     <div className="bg-white flex justify-center items-center bottom-0 h-12 w-full absolute">
       <div className="space-x-2 bg-pkdBlue bg-opacity-50 p-1 rounded-sm shadow-md flex items-center h-fit">
         <button
           className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-            currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
+            currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
           }`}
           onClick={handleMaxPrevPage}
-          disabled={currentPage === "1"}
+          disabled={currentPage === 1}
         >
           <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
             <TbArrowBackUpDouble />
@@ -29,10 +30,10 @@ const Pagination = ({
 
         <button
           className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-            currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
+            currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
           }`}
           onClick={handlePrevPage}
-          disabled={currentPage === "1"}
+          disabled={currentPage === 1}
         >
           <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
             <IoIosArrowBack />
@@ -55,10 +56,10 @@ const Pagination = ({
 
         <button
           className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-            offset === 1020 ? "cursor-not-allowed opacity-50" : ""
+            currentPage === lastPage ? "cursor-not-allowed opacity-50" : ""
           }`}
           style={{ transform: "rotate(180deg)" }}
-          disabled={offset === 1020}
+          disabled={currentPage === lastPage}
           onClick={handleNextPage}
         >
           <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
@@ -69,9 +70,9 @@ const Pagination = ({
         <button
           style={{ transform: "scaleX(-1)" }} // Flip horizontally
           className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-            offset === 1020 ? "cursor-not-allowed opacity-50" : ""
+            currentPage === lastPage ? "cursor-not-allowed opacity-50" : ""
           }`}
-          disabled={offset === 1020}
+          disabled={currentPage === lastPage}
           onClick={handleMaxNextPage}
         >
           <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">

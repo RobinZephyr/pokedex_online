@@ -2,6 +2,7 @@
 import Header from "@/components/home/Header";
 import Pagination from "@/components/home/Pagination";
 import PokemonCard from "@/components/home/PokemoCard";
+import Image from "next/image";
 import SearchBar from "@/components/home/SearchBar";
 import { IoIosArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
@@ -16,14 +17,21 @@ const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
 export default function Home() {
   const [listPokemon, setListPokemon] = useState([]);
 
-  const [currentPage, setCurrentPage] = useState("1");
+  const [currentPage, setCurrentPage] = useState(1);
   const [pages, setPages] = useState([]);
-  const [fetchData, setFetchData] = useState([]);
+  const [fetchData, setFetchData] = useState<{ results: any[] }>({
+    results: [],
+  });
+
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState();
-
+  const [lastPage, setLastPage] = useState(0);
   const initialFetch = async () => {
+    if (selectedType !== "") {
+      return;
+    }
+
     setLoading(true);
     const response = await fetch(
       `https://pokeapi.co/api/v2/pokemon?limit=10&offset=${offset}`
@@ -53,7 +61,6 @@ export default function Home() {
         setLoading(false);
       }
     }
-    console.log("initialfetch", data);
     setFetchData(data);
   };
 
@@ -62,7 +69,18 @@ export default function Home() {
   }, [currentPage]);
 
   const handleNextPage = async () => {
-    setLoading(true);
+    if (selectedType !== "") {
+      const allPokemonTypeNewpage = [];
+      setCurrentPage(currentPage + 1);
+
+      const pageNum = currentPage;
+
+      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+
+      setFetchData(allPokemonTypeNewpage);
+      return;
+    }
+
     const nextPageUrl = fetchData.next;
     if (nextPageUrl) {
       try {
@@ -72,7 +90,7 @@ export default function Home() {
         }
         const data = await response.json();
         setFetchData(data);
-        setCurrentPage(String(parseInt(currentPage) + 1));
+        setCurrentPage(currentPage + 1);
         setOffset(offset + 10); // Increment offset by 10 for next page
       } catch (error) {
         console.error("Error fetching next page data:", error);
@@ -82,7 +100,17 @@ export default function Home() {
   };
 
   const handleMaxNextPage = async () => {
-    setLoading(true);
+    if (selectedType !== "") {
+      const allPokemonTypeNewpage = [];
+      const pageNum = lastPage - 1;
+      setCurrentPage(Number(lastPage));
+
+      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+
+      setFetchData(allPokemonTypeNewpage);
+      return;
+    }
+
     const nextPageUrl = fetchData.next;
     if (nextPageUrl) {
       try {
@@ -92,7 +120,7 @@ export default function Home() {
         }
         const data = await response.json();
         setFetchData(data);
-        setCurrentPage(String("103"));
+        setCurrentPage(103);
         setOffset(1020); // Increment offset by 10 for next page
       } catch (error) {
         console.error("Error fetching next page data:", error);
@@ -102,7 +130,17 @@ export default function Home() {
   };
 
   const handleMaxPrevPage = async () => {
-    setLoading(true);
+    if (selectedType !== "") {
+      setCurrentPage(1);
+
+      const allPokemonTypeNewpage = [];
+
+      allPokemonTypeNewpage.results = allPokemonType.results[0];
+
+      setFetchData(allPokemonTypeNewpage);
+      return;
+    }
+
     const prevPageUrl = fetchData.previous;
     if (prevPageUrl) {
       try {
@@ -112,7 +150,7 @@ export default function Home() {
         }
         const data = await response.json();
         setFetchData(data);
-        setCurrentPage(String(parseInt("1")));
+        setCurrentPage(1);
         setOffset(0); // Decrement offset by 10 for previous page
       } catch (error) {
         console.error("Error fetching previous page data:", error);
@@ -122,7 +160,19 @@ export default function Home() {
   };
 
   const handlePrevPage = async () => {
-    setLoading(true);
+    // setLoading(true);
+
+    if (selectedType !== "") {
+      const allPokemonTypeNewpage = [];
+      const pageNum = currentPage - 2;
+      setCurrentPage(currentPage - 1);
+
+      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+
+      setFetchData(allPokemonTypeNewpage);
+      return;
+    }
+
     const prevPageUrl = fetchData.previous;
     if (prevPageUrl) {
       try {
@@ -132,8 +182,8 @@ export default function Home() {
         }
         const data = await response.json();
         setFetchData(data);
-        setCurrentPage(String(parseInt(currentPage) - 1));
-        setOffset(offset - 10); // Decrement offset by 10 for previous page
+        setCurrentPage(currentPage - 1);
+        setOffset(offset - 10);
       } catch (error) {
         console.error("Error fetching previous page data:", error);
       } finally {
@@ -141,24 +191,39 @@ export default function Home() {
     }
   };
 
+  // Checkpoint
   const handlePageChange = (selectedValue) => {
+    if (selectedType !== "") {
+      const newPage = selectedValue;
+      setCurrentPage(selectedValue);
+
+      const allPokemonTypeNewpage = [];
+      const pageNum = selectedValue - 1;
+
+      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+
+      setFetchData(allPokemonTypeNewpage);
+      return;
+    }
+
     setCurrentPage(selectedValue);
     const selectedOption = pages.find(
       (option) => option.value === selectedValue
     );
+
     if (selectedOption) {
       setOffset(selectedOption.offset);
     }
   };
   const generatePageOptions = () => {
     const totalCount = fetchData ? fetchData.count : 0;
-    const totalPages = 103;
+    const totalPages = selectedType === "" ? 103 : allPokemonType.count;
     const options = Array.from({ length: totalPages }, (_, index) => ({
       label: `${index + 1}`,
       value: index + 1,
       offset: index * 10,
     }));
-
+    setLastPage(totalPages);
     setPages(options);
   };
 
@@ -168,8 +233,10 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
+    setSearchFailed("");
     const fetchPokemonDetails = async () => {
       const pokemonDetails = [];
+
       for (const pokemon of fetchData.results) {
         try {
           const pokemonResponse = await fetch(pokemon.url);
@@ -183,7 +250,6 @@ export default function Home() {
           pokemonData.spriteDisplay =
             pokemonData.sprites.other["official-artwork"].front_default;
 
-          // Check if dexNumber is not equal to 5 before pushing to pokemonDetails
           if (pokemonData.dexNumber.length !== 5) {
             pokemonDetails.push(pokemonData);
           }
@@ -193,7 +259,6 @@ export default function Home() {
         }
       }
       setLoading(false);
-      console.log("pokemon details", pokemonDetails);
       setListPokemon(pokemonDetails);
     };
 
@@ -202,14 +267,10 @@ export default function Home() {
     }
   }, [fetchData]);
 
-  const [selectedType, setSelectedType] = useState("Type");
-  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedType(event.target.value);
-  };
-
   // Searchbar
   const [searchTermShow, setSearchTermShow] = useState("");
   const [searchTermToSearch, setSearchTermToSearch] = useState("");
+  const [searchFailed, setSearchFailed] = useState("");
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     const lowerCase = query.toLowerCase();
@@ -221,18 +282,30 @@ export default function Home() {
     preventDefault: () => void;
   }) => {
     event.preventDefault();
+    setSearchFailed("");
+    setSelectedType("");
+    setLastPage(1);
+
+    const options = Array.from({ length: 1 }, (_, index) => ({
+      label: `${index + 1}`,
+      value: 1,
+      offset: 1,
+    }));
+    setPages(options);
+
     if (searchTermToSearch === "") {
       initialFetch();
       return;
     }
 
-    console.log(searchTermToSearch);
     setLoading(true);
     const response = await fetch(
       `https://pokeapi.co/api/v2/pokemon/${searchTermToSearch}`
     );
     if (!response.ok) {
-      throw new Error("Failed to fetch Pokemon data");
+      setLoading(false);
+      setSearchFailed("Pokemon not found");
+      return;
     }
     setLoading(false);
     const data = await response.json();
@@ -243,7 +316,99 @@ export default function Home() {
     data.spriteDisplay = data.sprites.other["official-artwork"].front_default;
 
     setListPokemon([data]);
-    console.log(data.name);
+  };
+
+  // Type Filter
+  const [selectedType, setSelectedType] = useState("");
+  const [allPokemonType, setAllPokemonType] = useState([]);
+  const perPage = 10;
+  const handleTypeChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setLoading(true);
+    setSelectedType(event.target.value);
+    const type = event.target.value.toLowerCase();
+    if (type !== "") {
+      try {
+        const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Pokemon data");
+        }
+        const data = await response.json();
+        const fetchedPokemon = [];
+
+        const allPokemon = data.pokemon;
+
+        if (Array.isArray(allPokemon)) {
+        }
+
+        if (Array.isArray(data.pokemon)) {
+          for (const pokemon of data.pokemon) {
+            try {
+              const pokemonResponse = await fetch(pokemon.pokemon.url);
+              if (!pokemonResponse.ok) {
+                throw new Error("Failed to fetch Pokemon details");
+              }
+              const pokemonData = await pokemonResponse.json();
+              const formattedOrder = String(pokemonData.id).padStart(3, "0");
+
+              pokemon.dexNumber = formattedOrder;
+              pokemonData.dexNumber = formattedOrder;
+              if (pokemonData.dexNumber.length === 5) {
+                fetchedPokemon.push(pokemonData.name);
+              }
+            } catch (error) {
+              setLoading(false);
+            }
+          }
+
+          const allPokemon = data.pokemon;
+
+          const pokemonResults2 = data.pokemon.map(({ pokemon }) => ({
+            name: pokemon.name,
+            url: pokemon.url,
+          }));
+
+          const filteredPokemon = pokemonResults2.filter((pokemon) =>
+            fetchedPokemon.includes(pokemon.name)
+          );
+          const remainingPokemon = pokemonResults2.filter(
+            (pokemon) =>
+              !filteredPokemon.find(
+                (filtered) => filtered.name === pokemon.name
+              )
+          );
+
+          const totalPages = Math.ceil(remainingPokemon.length / perPage);
+
+          const chunkedPokemon = Array.from(
+            { length: totalPages },
+            (_, index) =>
+              remainingPokemon.slice(index * perPage, (index + 1) * perPage)
+          );
+          const arrayPokemon = [];
+          arrayPokemon.count = chunkedPokemon.length;
+          arrayPokemon.results = chunkedPokemon;
+
+          setCurrentPage(1);
+
+          const firstPageData = {
+            count: chunkedPokemon.length,
+            results: chunkedPokemon[0] || [],
+          };
+
+          setFetchData(firstPageData);
+
+          setAllPokemonType(arrayPokemon);
+        } else {
+          console.error("Pokemon data is not in the expected format.");
+        }
+      } catch (error) {
+        console.error("Error fetching Pokemon data:", error);
+      }
+    } else {
+      initialFetch();
+    }
   };
 
   return (
@@ -277,14 +442,15 @@ export default function Home() {
               value={selectedType}
               onChange={handleTypeChange}
             >
-              <option>Type</option>
+              <option value="">Type</option>
               {PokemonTypes.map((type, index) => (
                 <option key={index} value={type.name}>
                   {type.name}
                 </option>
               ))}
             </select>
-            {selectedType !== "Type" ? (
+            {/* Checkpoint */}
+            {selectedType !== "" ? (
               <Image
                 src={typeIcons[selectedType.toLowerCase()]}
                 alt="Type"
@@ -311,21 +477,27 @@ export default function Home() {
           </div>
         ) : (
           <div className="">
-            <div
-              className={`w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5`}
-            >
-              {listPokemon.map((pokemon) => (
-                <div
-                  key={pokemon.name}
-                  className={` ${
-                    listPokemon.length === 1
-                      ? "col-span-2  md:col-span-3 lg:col-span-5 flex justify-center"
-                      : "col-span-1"
-                  }`}
-                >
-                  <PokemonCard pokemon={pokemon} />
+            <div className={`w-full `}>
+              {searchFailed ? (
+                <div className="flex bg-pkdBlue bg-opacity-60 p-3 rounded-md justify-center items-center text-3xl text-white mina-regular">
+                  {searchFailed} ...
                 </div>
-              ))}
+              ) : (
+                <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
+                  {listPokemon.map((pokemon) => (
+                    <div
+                      key={pokemon.name}
+                      className={` ${
+                        listPokemon.length === 1
+                          ? "col-span-2  md:col-span-3 lg:col-span-5 flex justify-center"
+                          : "col-span-1"
+                      }`}
+                    >
+                      <PokemonCard pokemon={pokemon} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -334,6 +506,7 @@ export default function Home() {
       <div className="absolute h-12 w-full mt-10">
         <Pagination
           currentPage={currentPage}
+          lastPage={lastPage}
           handleNextPage={handleNextPage}
           handleMaxNextPage={handleMaxNextPage}
           handlePrevPage={handlePrevPage}
