@@ -6,6 +6,7 @@ import SearchBar from "@/components/home/SearchBar";
 import { IoIosArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { TbArrowBackUpDouble } from "react-icons/tb";
 
 export default function Home() {
   const [listPokemon, setListPokemon] = useState([]);
@@ -48,7 +49,6 @@ export default function Home() {
       }
     }
 
-    console.log(data);
     setFetchData(data);
   };
 
@@ -76,6 +76,46 @@ export default function Home() {
     }
   };
 
+  const handleMaxNextPage = async () => {
+    setLoading(true);
+    const nextPageUrl = fetchData.next;
+    if (nextPageUrl) {
+      try {
+        const response = await fetch(nextPageUrl);
+        if (!response.ok) {
+          throw new Error("Failed to fetch next page data");
+        }
+        const data = await response.json();
+        setFetchData(data);
+        setCurrentPage(String("103"));
+        setOffset(1020); // Increment offset by 10 for next page
+      } catch (error) {
+        console.error("Error fetching next page data:", error);
+      } finally {
+      }
+    }
+  };
+
+  const handleMaxPrevPage = async () => {
+    setLoading(true);
+    const prevPageUrl = fetchData.previous;
+    if (prevPageUrl) {
+      try {
+        const response = await fetch(prevPageUrl);
+        if (!response.ok) {
+          throw new Error("Failed to fetch previous page data");
+        }
+        const data = await response.json();
+        setFetchData(data);
+        setCurrentPage(String(parseInt("1")));
+        setOffset(0); // Decrement offset by 10 for previous page
+      } catch (error) {
+        console.error("Error fetching previous page data:", error);
+      } finally {
+      }
+    }
+  };
+
   const handlePrevPage = async () => {
     setLoading(true);
     const prevPageUrl = fetchData.previous;
@@ -95,16 +135,6 @@ export default function Home() {
       }
     }
   };
-  const generatePageOptions = () => {
-    const totalCount = fetchData ? fetchData.count : 0;
-    const totalPages = Math.ceil(totalCount / 10);
-    const options = Array.from({ length: totalPages }, (_, index) => ({
-      label: `${index + 1}`,
-      value: index + 1,
-      offset: index * 10,
-    }));
-    setPages(options);
-  };
 
   const handlePageChange = (selectedValue) => {
     setCurrentPage(selectedValue);
@@ -114,6 +144,18 @@ export default function Home() {
     if (selectedOption) {
       setOffset(selectedOption.offset);
     }
+  };
+  const generatePageOptions = () => {
+    const totalCount = fetchData ? fetchData.count : 0;
+    const totalPages = 103;
+    const options = Array.from({ length: totalPages }, (_, index) => ({
+      label: `${index + 1}`,
+      value: index + 1,
+      offset: index * 10,
+    }));
+
+    console.log(options);
+    setPages(options);
   };
 
   useEffect(() => {
@@ -132,9 +174,6 @@ export default function Home() {
           }
           const pokemonData = await pokemonResponse.json();
           const formattedOrder = String(pokemonData.id).padStart(3, "0");
-          console.log(
-            pokemonData.sprites.other["official-artwork"].front_default
-          );
 
           pokemonData.dexNumber = formattedOrder;
           pokemonData.spriteDisplay =
@@ -167,28 +206,41 @@ export default function Home() {
       >
         <SearchBar />
 
-        {loading ? (
-          <div className="flex justify-center w-full item-center h-[20rem]">
-            <div className="flex items-center text-[10rem] text-white">
-              <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+        <div className="w-full max-h-screen h-screen flex items-center justify-center">
+          {loading ? (
+            <div className="flex justify-center w-full item-center ">
+              <div className="flex items-center text-[10rem] text-white">
+                <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="h-full">
-            <div className="h-full"></div>
-            <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
-              {" "}
-              {listPokemon.map((pokemon) => (
-                <PokemonCard key={pokemon.name} pokemon={pokemon} />
-              ))}
+          ) : (
+            <div className="">
+              <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
+                {" "}
+                {listPokemon.map((pokemon) => (
+                  <PokemonCard key={pokemon.name} pokemon={pokemon} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="absolute h-12 w-full mt-10">
         <div className="bg-white flex justify-center inset h-full w-full  bottom-0 flex items-center ">
           <div className="space-x-2 bg-pkdBlue bg-opacity-50 p-1 rounded-sm shadow-md flex items-center h-fit">
+            <button
+              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
+                currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              onClick={handleMaxPrevPage}
+              disabled={currentPage === "1"} // Disable the button based on currentPage value
+            >
+              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
+                <TbArrowBackUpDouble />
+              </div>
+            </button>
+
             <button
               className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
                 currentPage === "1" ? "cursor-not-allowed opacity-50" : ""
@@ -204,6 +256,7 @@ export default function Home() {
             <div className="w-10 text-center mina-regular bg-white rounded-sm shadow-md flex items-center justify-center pt-[.5px]">
               <select
                 value={currentPage}
+                className="text-center"
                 onChange={(e) => handlePageChange(Number(e.target.value))}
               >
                 {pages.map((option) => (
@@ -214,15 +267,32 @@ export default function Home() {
               </select>
             </div>
             <button
-              className="bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6"
+              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
+                offset === 1020 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              disabled={offset === 1020}
               onClick={handleNextPage}
-              disabled={parseInt(currentPage) >= pages.length}
             >
               <div
                 style={{ transform: "rotate(180deg)" }}
                 className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg"
               >
                 <IoIosArrowBack />
+              </div>
+            </button>
+
+            <button
+              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
+                offset === 1020 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              disabled={offset === 1020}
+              onClick={handleMaxNextPage}
+            >
+              <div
+                style={{ transform: "rotate(180deg)" }}
+                className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg"
+              >
+                <TbArrowBackUpDouble />
               </div>
             </button>
           </div>
