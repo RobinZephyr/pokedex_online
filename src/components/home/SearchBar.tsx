@@ -56,7 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           value={selectedType}
           onChange={handleTypeChange}
         >
-          <option value="">Type</option>
+          <option value="all">Type</option>
           {PokemonTypes.map((type, index) => (
             <option key={index} value={type.name}>
               {type.name}
@@ -64,7 +64,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           ))}
         </select>
         {/* Checkpoint */}
-        {selectedType !== "" ? (
+        {selectedType !== "all" ? (
           <Image
             src={typeIcons[selectedType.toLowerCase()]}
             alt="Type"
