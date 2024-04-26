@@ -13,6 +13,7 @@ import { pokeType } from "../assets/index.ts";
 import { StaticImageData } from "next/image";
 import { wooden_background } from "@/assets";
 import { PokemonTypes } from "@/assets/lists/pokemonType";
+import Link from "next/link";
 const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
 
 interface MyPokemonType {
@@ -505,7 +506,9 @@ export default function Home() {
                           : "col-span-1"
                       }`}
                     >
-                      <PokemonCard pokemon={pokemon} />
+                      <Link href={`/pokemon/${pokemon.name}`}>
+                        <PokemonCard pokemon={pokemon} />
+                      </Link>
                     </div>
                   ))}
                 </div>
