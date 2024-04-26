@@ -8,20 +8,44 @@ import { pokeType } from "../../assets/index.ts";
 import { StaticImageData } from "next/image";
 
 const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
-function SearchBar() {
-  const [selectedType, setSelectedType] = useState("Type");
-  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedType(event.target.value);
-  };
+
+interface SearchBarProps {
+  handleSearchButtonClick: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => Promise<void>;
+  handleSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
+
+  handleTypeSelectChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  searchTermShow: string;
+  selectedType: string;
+  pokeType: { [key: string]: StaticImageData };
+  handleTypeChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+  handleSearchButtonClick,
+  handleSearchInput,
+  handleTypeSelectChange,
+  searchTermShow,
+  selectedType,
+  pokeType,
+  handleTypeChange,
+}) => {
   return (
     <div className="w-fit bg-pkdBlue bg-opacity-60 rounded-sm p-2 flex items-center space-x-4 ">
       <div className="h-full flex item-center space-x-2">
         <input
+          onChange={handleSearchInput}
+          value={searchTermShow}
           placeholder="Search "
-          className=" rounded-sm tracking-widest h-8 pt-2  p-1 w-full md:w-60 mina-regular shadow-sm "
+          className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
         />
 
-        <button className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600">
+        <button
+          type="button"
+          onClick={handleSearchButtonClick}
+          className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600"
+        >
           <FaMagnifyingGlass />
         </button>
       </div>
@@ -32,14 +56,15 @@ function SearchBar() {
           value={selectedType}
           onChange={handleTypeChange}
         >
-          <option>Type</option>
+          <option value="">Type</option>
           {PokemonTypes.map((type, index) => (
             <option key={index} value={type.name}>
               {type.name}
             </option>
           ))}
         </select>
-        {selectedType !== "Type" ? (
+        {/* Checkpoint */}
+        {selectedType !== "" ? (
           <Image
             src={typeIcons[selectedType.toLowerCase()]}
             alt="Type"
@@ -57,6 +82,6 @@ function SearchBar() {
       </div>
     </div>
   );
-}
+};
 
 export default SearchBar;

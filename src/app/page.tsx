@@ -327,6 +327,8 @@ export default function Home() {
   ) => {
     setLoading(true);
     setSelectedType(event.target.value);
+    setSearchTermShow("");
+    setSearchTermToSearch("");
     const type = event.target.value.toLowerCase();
     if (type !== "") {
       try {
@@ -418,55 +420,14 @@ export default function Home() {
         style={{ zIndex: 10 }}
         className="px-[10px] md:px-[50px] mt-[50px] w-full h-full"
       >
-        <div className="w-fit bg-pkdBlue bg-opacity-60 rounded-sm p-2 flex items-center space-x-4 ">
-          <div className="h-full flex item-center space-x-2">
-            <input
-              onChange={handleSearchInput}
-              value={searchTermShow}
-              placeholder="Search "
-              className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
-            />
-
-            <button
-              type="button"
-              onClick={handleSearchButtonClick}
-              className="p-2 rounded-sm bg-green-500 w-8 h-8 text-white shadow-md animated hover:bg-green-600"
-            >
-              <FaMagnifyingGlass />
-            </button>
-          </div>
-
-          <div className=" flex space-x-2 ">
-            <select
-              className="h-8 rounded-md mina-regular flex items-center"
-              value={selectedType}
-              onChange={handleTypeChange}
-            >
-              <option value="">Type</option>
-              {PokemonTypes.map((type, index) => (
-                <option key={index} value={type.name}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-            {/* Checkpoint */}
-            {selectedType !== "" ? (
-              <Image
-                src={typeIcons[selectedType.toLowerCase()]}
-                alt="Type"
-                title={selectedType}
-                className="w-8 h-8 rounded-md shadow-md"
-              />
-            ) : (
-              <div
-                title="Choose a Type"
-                className="hover:cursor-default pt-1 w-8 h-8 text-white mina-regular text-lg rounded-md bg-gray-500 shadow-md flex justify-center items-center"
-              >
-                ?
-              </div>
-            )}
-          </div>
-        </div>
+        <SearchBar
+          handleSearchButtonClick={handleSearchButtonClick}
+          handleSearchInput={handleSearchInput}
+          handleTypeChange={handleTypeChange}
+          searchTermShow={searchTermShow}
+          selectedType={selectedType}
+          pokeType={pokeType}
+        />
       </div>
       <div className="w-full  flex items-center justify-center min-h-[30rem]">
         {loading ? (
