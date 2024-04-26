@@ -14,13 +14,39 @@ import { StaticImageData } from "next/image";
 import { wooden_background } from "@/assets";
 import { PokemonTypes } from "@/assets/lists/pokemonType";
 const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
+
+interface MyPokemonType {
+  id: number;
+  name: string;
+  url: string;
+  dexNumber: string;
+  spriteDisplay: string;
+  sprites: {
+    other: {
+      "official-artwork": {
+        front_default: string;
+      };
+    };
+  };
+}
+
 export default function Home() {
-  const [listPokemon, setListPokemon] = useState([]);
+  const [listPokemon, setListPokemon] = useState<MyPokemonType[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pages, setPages] = useState([]);
-  const [fetchData, setFetchData] = useState<{ results: any[] }>({
+  const [pages, setPages] = useState<
+    { label: string; value: number; offset: number }[]
+  >([]);
+  const [fetchData, setFetchData] = useState<{
+    results: any[];
+    next?: string;
+    previous?: string;
+    count?: number;
+  }>({
     results: [],
+    next: undefined,
+    previous: undefined,
+    count: 0,
   });
 
   const [offset, setOffset] = useState(0);
@@ -70,15 +96,12 @@ export default function Home() {
 
   const handleNextPage = async () => {
     if (selectedType !== "all") {
-      const allPokemonTypeNewpage:
-        | never[]
-        | { results: any[] }
-        | ((prevState: { results: any[] }) => { results: any[] }) = [];
+      const allPokemonTypeNewpage: { results: any[] } = { results: [] };
       setCurrentPage(currentPage + 1);
 
       const pageNum = currentPage;
 
-      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+      allPokemonTypeNewpage.results = allPokemonType.results?.[pageNum];
 
       setFetchData(allPokemonTypeNewpage);
       return;
@@ -104,11 +127,11 @@ export default function Home() {
 
   const handleMaxNextPage = async () => {
     if (selectedType !== "all") {
-      const allPokemonTypeNewpage = [];
+      const allPokemonTypeNewpage: { results: any[] } = { results: [] };
       const pageNum = lastPage - 1;
       setCurrentPage(Number(lastPage));
 
-      allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
+      allPokemonTypeNewpage.results = allPokemonType.results?.[pageNum] || [];
 
       setFetchData(allPokemonTypeNewpage);
       return;
@@ -136,7 +159,7 @@ export default function Home() {
     if (selectedType !== "all") {
       setCurrentPage(1);
 
-      const allPokemonTypeNewpage = [];
+      const allPokemonTypeNewpage: { results: any[] } = { results: [] };
 
       allPokemonTypeNewpage.results = allPokemonType.results[0];
 
@@ -164,7 +187,7 @@ export default function Home() {
 
   const handlePrevPage = async () => {
     if (selectedType !== "all") {
-      const allPokemonTypeNewpage = [];
+      const allPokemonTypeNewpage: { results: any[] } = { results: [] };
       const pageNum = currentPage - 2;
       setCurrentPage(currentPage - 1);
 
@@ -192,12 +215,12 @@ export default function Home() {
     }
   };
 
-  const handlePageChange = (selectedValue) => {
+  const handlePageChange = (selectedValue: number) => {
     if (selectedType !== "all") {
       const newPage = selectedValue;
       setCurrentPage(selectedValue);
 
-      const allPokemonTypeNewpage = [];
+      const allPokemonTypeNewpage = { results: [] };
       const pageNum = selectedValue - 1;
 
       allPokemonTypeNewpage.results = allPokemonType.results[pageNum];
@@ -217,7 +240,7 @@ export default function Home() {
   };
   const generatePageOptions = () => {
     const totalCount = fetchData ? fetchData.count : 0;
-    const totalPages = selectedType === "all" ? 103 : allPokemonType.count;
+    const totalPages = selectedType === "all" ? 103 : allPokemonType.count || 0;
     const options = Array.from({ length: totalPages }, (_, index) => ({
       label: `${index + 1}`,
       value: index + 1,
@@ -230,12 +253,13 @@ export default function Home() {
   useEffect(() => {
     generatePageOptions();
   }, [fetchData]);
+  const [selectedType, setSelectedType] = useState("all");
 
   useEffect(() => {
     setLoading(true);
     setSearchFailed("");
     const fetchPokemonDetails = async () => {
-      const pokemonDetails = [];
+      const pokemonDetails: MyPokemonType[] = [];
 
       for (const pokemon of fetchData.results) {
         try {
@@ -271,12 +295,14 @@ export default function Home() {
   const [searchTermToSearch, setSearchTermToSearch] = useState("");
   const [searchFailed, setSearchFailed] = useState("");
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedType("all");
     const query = event.target.value;
     const lowerCase = query.toLowerCase();
     setSearchTermToSearch(lowerCase);
     setSearchTermShow(query);
   };
 
+  const [toSearch, setToSearch] = useState([]);
   const handleSearchButtonClick = async (event: {
     preventDefault: () => void;
   }) => {
@@ -293,32 +319,48 @@ export default function Home() {
     setPages(options);
 
     if (searchTermToSearch === "") {
+      setCurrentPage(1);
+      setOffset(0);
       initialFetch();
       return;
     }
 
-    setLoading(true);
-    const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${searchTermToSearch}`
-    );
-    if (!response.ok) {
-      setLoading(false);
-      setSearchFailed("Pokemon not found");
-      return;
+    if (searchTermToSearch !== "") {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${searchTermToSearch}`
+      );
+      if (!response.ok) {
+        setLoading(false);
+        setSearchFailed("Pokemon not found");
+        return;
+      }
+      const data = await response.json();
+
+      const formattedOrder = String(data.id).padStart(3, "0");
+
+      data.dexNumber = formattedOrder;
+      data.spriteDisplay = data.sprites.other["official-artwork"].front_default;
+      setToSearch(data);
     }
-    setLoading(false);
-    const data = await response.json();
-
-    const formattedOrder = String(data.id).padStart(3, "0");
-
-    data.dexNumber = formattedOrder;
-    data.spriteDisplay = data.sprites.other["official-artwork"].front_default;
-
-    setListPokemon([data]);
   };
 
-  const [selectedType, setSelectedType] = useState("all");
-  const [allPokemonType, setAllPokemonType] = useState([]);
+  useEffect(() => {
+    console.log(toSearch);
+    if (toSearch) {
+      setListPokemon(Array.isArray(toSearch) ? toSearch : [toSearch]);
+    }
+  }, [toSearch]);
+
+  const [allPokemonType, setAllPokemonType] = useState<{
+    results: any[];
+    next?: string;
+    count?: number;
+  }>({
+    results: [],
+    next: undefined,
+    count: 0,
+  });
+
   const perPage = 10;
   const handleTypeChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -341,7 +383,7 @@ export default function Home() {
           throw new Error("Failed to fetch Pokemon data");
         }
         const data = await response.json();
-        const fetchedPokemon = [];
+        const fetchedPokemon: any[] = [];
 
         const allPokemon = data.pokemon;
 
@@ -370,18 +412,20 @@ export default function Home() {
 
           const allPokemon = data.pokemon;
 
-          const pokemonResults2 = data.pokemon.map(({ pokemon }) => ({
-            name: pokemon.name,
-            url: pokemon.url,
-          }));
+          const pokemonResults2 = data.pokemon.map(
+            ({ pokemon }: { pokemon: MyPokemonType }) => ({
+              name: pokemon.name,
+              url: pokemon.url,
+            })
+          );
 
-          const filteredPokemon = pokemonResults2.filter((pokemon) =>
-            fetchedPokemon.includes(pokemon.name)
+          const filteredPokemon = pokemonResults2.filter(
+            (pokemon: { name: any }) => fetchedPokemon.includes(pokemon.name)
           );
           const remainingPokemon = pokemonResults2.filter(
-            (pokemon) =>
+            (pokemon: { name: any }) =>
               !filteredPokemon.find(
-                (filtered) => filtered.name === pokemon.name
+                (filtered: { name: any }) => filtered.name === pokemon.name
               )
           );
 
@@ -392,9 +436,10 @@ export default function Home() {
             (_, index) =>
               remainingPokemon.slice(index * perPage, (index + 1) * perPage)
           );
-          const arrayPokemon = [];
-          arrayPokemon.count = chunkedPokemon.length;
-          arrayPokemon.results = chunkedPokemon;
+          const arrayPokemon: { count: number; results: any[] } = {
+            count: chunkedPokemon.length,
+            results: chunkedPokemon,
+          };
 
           const firstPageData = {
             count: chunkedPokemon.length,
@@ -451,7 +496,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
-                  {listPokemon.map((pokemon) => (
+                  {listPokemon.map((pokemon: any) => (
                     <div
                       key={pokemon.name}
                       className={` ${

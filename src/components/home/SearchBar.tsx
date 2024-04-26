@@ -15,7 +15,6 @@ interface SearchBarProps {
   ) => Promise<void>;
   handleSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
 
-  handleTypeSelectChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   searchTermShow: string;
   selectedType: string;
   pokeType: { [key: string]: StaticImageData };
@@ -25,7 +24,6 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({
   handleSearchButtonClick,
   handleSearchInput,
-  handleTypeSelectChange,
   searchTermShow,
   selectedType,
   pokeType,
@@ -58,7 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         >
           <option value="all">Type</option>
           {PokemonTypes.map((type, index) => (
-            <option key={index} value={type.name}>
+            <option key={type.name} value={type.name}>
               {type.name}
             </option>
           ))}
