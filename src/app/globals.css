@@ -102,3 +102,75 @@ body {
 .animated {
   transition: all 0.3s ease;
 }
+
+.bg-normal {
+  background-color: #c1bcb6;
+}
+.bg-fire {
+  background-color: #fc671a;
+}
+
+.bg-water {
+  background-color: #0083c2;
+}
+
+.bg-electric {
+  background-color: #fcdc00;
+}
+
+/* Add classes for other types */
+.bg-grass {
+  background-color: #35d32f;
+}
+
+.bg-ice {
+  background-color: #1dc1dd;
+}
+
+.bg-fighting {
+  background-color: #fcb600;
+}
+
+.bg-poison {
+  background-color: #b04ec4;
+}
+
+.bg-ground {
+  background-color: #c6883d;
+}
+
+.bg-flying {
+  background-color: #93d5e8;
+}
+
+.bg-psychic {
+  background-color: #f16177;
+}
+
+.bg-bug {
+  background-color: #c2d501;
+}
+
+.bg-rock {
+  background-color: #cbc594;
+}
+
+.bg-ghost {
+  background-color: #805474;
+}
+
+.bg-dark {
+  background-color: #5c514f;
+}
+
+.bg-dragon {
+  background-color: #406ca9;
+}
+
+.bg-steel {
+  background-color: #72c3d5;
+}
+
+.bg-fairy {
+  background-color: #f3b1db;
+}

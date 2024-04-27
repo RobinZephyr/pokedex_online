@@ -467,7 +467,6 @@ export default function Home() {
   }, [selectedType]);
   return (
     <div>
-      <Header />
       <div
         style={{ zIndex: 10 }}
         className="px-[10px] md:px-[50px] mt-[50px] w-full h-full"
