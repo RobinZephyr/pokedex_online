@@ -13,6 +13,7 @@ import PokemonStats from "@/components/details/PokemonStats";
 import { TbArrowBackUpDouble } from "react-icons/tb";
 import { IoIosArrowBack } from "react-icons/io";
 import Link from "next/link";
+import PokemonDetailsPagination from "@/components/details/PokemonDetailsPagination";
 interface PokemonDetails {
   results: PokemonDetails[];
   id: number;
@@ -94,6 +95,7 @@ function Page() {
     setShinyOn(!shinyOn);
   };
 
+  const [maxId, setMaxId] = useState(1025);
   useEffect(() => {
     const fetchPokemonData = async () => {
       const currentUrl = window.location.href;
@@ -461,53 +463,7 @@ function Page() {
         </div>
       </div>
 
-      <div className="bg-white px-[10px] md:px-[50px]  flex justify-center items-center mt-auto h-12 w-full absolute">
-        <div className="flex justify-start w-6">
-          <Link href="/">
-            <button
-              className={`bg-green-700 flex justify-center items-center hover:bg-green-900 animated text-green-700 rounded-sm w-6 h-6 `}
-            >
-              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
-                <FaHome />
-              </div>
-            </button>
-          </Link>
-        </div>
-
-        <div className="w-full flex justify-center">
-          <div className="space-x-2 bg-pkdBlue bg-opacity-50 p-1 rounded-sm shadow-md flex items-center h-fit">
-            <button
-              disabled={pokemon[0].id === 1}
-              onClick={handlePrev}
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                pokemon[0].id === 1 ? "cursor-not-allowed opacity-50" : ""
-              }`}
-            >
-              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
-                <IoIosArrowBack />
-              </div>
-            </button>
-
-            <div className="p-1  h-6 flex items-center text-white">
-              {pokemon[0].dexNumber}
-            </div>
-
-            <button
-              onClick={handleNext}
-              disabled={pokemon[0].id === 1025}
-              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
-                pokemon[0].id === 1025 ? "cursor-not-allowed opacity-50" : ""
-              }`}
-              style={{ transform: "rotate(180deg)" }}
-            >
-              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
-                <IoIosArrowBack />
-              </div>
-            </button>
-          </div>
-        </div>
-        <div className="w-6"> </div>
-      </div>
+      <PokemonDetailsPagination pokemonId={pokemon[0].id} maxId={maxId} />
     </div>
   );
 }
