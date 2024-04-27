@@ -19,6 +19,8 @@ import steel from "../assets/images/type icons/steel.png";
 import fairy from "../assets/images/type icons/fairy.png";
 import { StaticImageData } from "next/image";
 
+import shiny_on from "../assets/images/shiny_icon_on.png";
+import shiny_off from "../assets/images/shiny_icon_off.png";
 const pokeType: { [key: string]: StaticImageData } = {
   normal,
   fire,
@@ -40,4 +42,4 @@ const pokeType: { [key: string]: StaticImageData } = {
   steel,
 };
 
-export { wooden_background, pokeType };
+export { wooden_background, shiny_on, shiny_off, pokeType };
