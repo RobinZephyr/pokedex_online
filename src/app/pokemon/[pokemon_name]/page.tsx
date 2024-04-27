@@ -70,6 +70,16 @@ interface Stats {
   total: number;
 }
 
+interface Varieties {
+  is_default: boolean;
+  pokemon: {
+    id?: number;
+    form?: string;
+    name: string;
+    url: string;
+  };
+}
+
 interface TypeDamage {
   weakTo: string[];
   quadWeakTo: string[]; // Define weakTo as an array of strings
@@ -96,12 +106,14 @@ function Page() {
   };
 
   const [maxId, setMaxId] = useState(1025);
+  const [currentPokemon, setCurrentPokemon] = useState(1025);
   useEffect(() => {
     const fetchPokemonData = async () => {
       const currentUrl = window.location.href;
       const parts = currentUrl.split("/");
       const pokemonName = parts[parts.length - 1];
       const modifiedPokemonName = pokemonName.split("-")[0];
+
       try {
         const response = await fetch(
           `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
@@ -109,19 +121,50 @@ function Page() {
         if (!response.ok) {
           throw new Error("Failed to fetch Pokemon data");
         }
+        const data = await response.json();
+        let pokemonSpecies = 0;
+        const idLength = data.id.toString().length;
+        if (idLength === 5) {
+          const match = data.species.url.match(/pokemon-species\/(\d+)\//);
+          pokemonSpecies = match[1];
+          setCurrentPokemon(pokemonSpecies);
+        } else {
+          pokemonSpecies = Number(parts[parts.length - 1]);
+          setCurrentPokemon(pokemonSpecies);
+        }
 
         const species = await fetch(
-          `https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`
+          `https://pokeapi.co/api/v2/pokemon-species/${pokemonSpecies}`
         );
+
         if (!species.ok) {
           throw new Error("Failed to fetch Pokemon Species");
         }
 
         const speciesData = await species.json();
+        let nonDefaultVarieties: Varieties[] = [];
+        speciesData.varieties.forEach((variety: Varieties) => {
+          const match = variety.pokemon.url.match(/pokemon\/(\d+)\//);
+          if (match) {
+            variety.pokemon.id = Number(match[1]); // Ensure the id is set here
+          }
+
+          const style = variety.pokemon.name.match(/-(.*)/);
+          const namePartAfterDash = style ? style[1] : null;
+          if (namePartAfterDash) {
+            variety.pokemon.form = String(namePartAfterDash); // Ensure the id is set here
+          }
+
+          if (!variety.is_default) {
+            nonDefaultVarieties.push(variety); // Push the variety with the id set
+          }
+        });
+
         const genusEntry = speciesData.genera.find(
           (entry: { language: { name: string } }) =>
             entry.language.name === "en"
         );
+
         const genus = genusEntry ? genusEntry.genus : null;
         const flavorTextEntries = speciesData.flavor_text_entries;
         const englishFlavorText = flavorTextEntries.find(
@@ -132,7 +175,6 @@ function Page() {
         const dexEntry = englishFlavorText.flavor_text;
         const formattedDexEntry = dexEntry.replace(/\f/g, " ");
 
-        const data = await response.json();
         const formattedOrder = String(data.id).padStart(3, "0");
         const defaultSprite =
           data.sprites.other["official-artwork"].front_default;
@@ -142,7 +184,7 @@ function Page() {
         data.dexNumber = formattedOrder;
         data.genus = genus;
         data.dexEntry = formattedDexEntry;
-
+        data.variations = nonDefaultVarieties;
         if (data.types.length === 1) {
           const singleType = data.types[0].type.name;
           const type = await fetch(
@@ -339,6 +381,8 @@ function Page() {
         data.abilities.desc = newAbility;
         data.abilityNew = newAbility;
         data.stats.total = totalBaseStat;
+        console.log(data);
+
         const array: PokemonDetails[] = [data];
 
         setPokemon(array);
@@ -463,7 +507,7 @@ function Page() {
         </div>
       </div>
 
-      <PokemonDetailsPagination pokemonId={pokemon[0].id} maxId={maxId} />
+      <PokemonDetailsPagination pokemonId={currentPokemon} maxId={maxId} />
     </div>
   );
 }

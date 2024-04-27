@@ -20,8 +20,8 @@ const PokemonDetailsPagination: React.FC<PokemonDetailsPaginationProps> = ({
   };
 
   const handleNext = () => {
-    const nextId = pokemonId + 1;
-    if (nextId <= maxId) {
+    const nextId = Number(pokemonId) + 1;
+    if (nextId) {
       window.location.href = `/pokemon/${nextId}`;
     }
   };
