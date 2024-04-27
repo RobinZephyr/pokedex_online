@@ -63,18 +63,20 @@ const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
       <img
         width={290}
         height={290}
-        className="object-fill pb-5"
+        className=" pb-0"
         src={!shinyOn ? pokemon.defaultSprite : pokemon.shinySprite}
         alt={pokemon.name}
       />
 
-      <div className="w-full h-[300px] absolute flex justify-center">
-        <div className="absolute inset-0 flex justify-center items-center">
-          <Image
+      <div className="w-[300px] h-[300px] absolute flex justify-center">
+        <div className="absolute inset-0 flex justify-end items-center">
+          <div
             style={{ zIndex: -1 }}
-            src={pokemonBattlePlatforms[pokemon.types[0].type.name]}
-            alt={pokemon.types[0].type.name}
-            className="mt-auto w-[350px] h-[100px]"
+            className={`bg-black absolute bg-opacity-50 w-[90%] h-[90%]  rounded-full `}
+          />
+          <div
+            style={{ zIndex: -1 }}
+            className={`bg-op-${pokemon.types[0].type.name} absolute w-[90%] h-[90%]  rounded-full `}
           />
         </div>
       </div>

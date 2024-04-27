@@ -505,7 +505,7 @@ export default function Home() {
                           : "col-span-1"
                       }`}
                     >
-                      <Link href={`/pokemon/${pokemon.name}`}>
+                      <Link href={`/pokemon/${pokemon.id}`}>
                         <PokemonCard pokemon={pokemon} />
                       </Link>
                     </div>

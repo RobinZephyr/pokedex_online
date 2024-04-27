@@ -100,7 +100,7 @@ body {
 }
 
 .animated {
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 
 .bg-normal {
@@ -173,4 +173,76 @@ body {
 
 .bg-fairy {
   background-color: #f3b1db;
+}
+
+.bg-op-normal {
+  background-color: rgba(193, 188, 182, 0.1); /* #c1bcb6 with 30% opacity */
+}
+
+.bg-op-fire {
+  background-color: rgba(252, 103, 26, 0.1); /* #fc671a with 30% opacity */
+}
+
+.bg-op-water {
+  background-color: rgba(0, 131, 194, 0.1); /* #0083c2 with 30% opacity */
+}
+
+.bg-op-electric {
+  background-color: rgba(252, 220, 0, 0.1); /* #fcdc00 with 30% opacity */
+}
+
+.bg-op-grass {
+  background-color: rgba(53, 211, 47, 0.1); /* #35d32f with 30% opacity */
+}
+
+.bg-op-ice {
+  background-color: rgba(29, 193, 221, 0.1); /* #1dc1dd with 30% opacity */
+}
+
+.bg-op-fighting {
+  background-color: rgba(252, 182, 0, 0.1); /* #fcb600 with 30% opacity */
+}
+
+.bg-op-poison {
+  background-color: rgba(176, 78, 196, 0.1); /* #b04ec4 with 30% opacity */
+}
+
+.bg-op-ground {
+  background-color: rgba(198, 136, 61, 0.1); /* #c6883d with 30% opacity */
+}
+
+.bg-op-flying {
+  background-color: rgba(147, 213, 232, 0.1); /* #93d5e8 with 30% opacity */
+}
+
+.bg-op-psychic {
+  background-color: rgba(241, 97, 119, 0.1); /* #f16177 with 30% opacity */
+}
+
+.bg-op-bug {
+  background-color: rgba(194, 213, 1, 0.1); /* #c2d501 with 30% opacity */
+}
+
+.bg-op-rock {
+  background-color: rgba(203, 197, 148, 0.1); /* #cbc594 with 30% opacity */
+}
+
+.bg-op-ghost {
+  background-color: rgba(128, 84, 116, 0.1); /* #805474 with 30% opacity */
+}
+
+.bg-op-dark {
+  background-color: rgba(92, 81, 79, 0.1); /* #5c514f with 30% opacity */
+}
+
+.bg-op-dragon {
+  background-color: rgba(64, 108, 169, 0.1); /* #406ca9 with 30% opacity */
+}
+
+.bg-op-steel {
+  background-color: rgba(114, 195, 213, 0.1); /* #72c3d5 with 30% opacity */
+}
+
+.bg-op-fairy {
+  background-color: rgba(243, 177, 219, 0.1); /* #f3b1db with 30% opacity */
 }
