@@ -69,7 +69,7 @@ const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
       />
 
       <div className="w-[300px] h-[300px] absolute flex justify-center">
-        <div className="absolute inset-0 flex justify-end items-center">
+        <div className="absolute inset-0 flex justify-center items-center">
           <div
             style={{ zIndex: -1 }}
             className={`bg-black absolute bg-opacity-50 w-[90%] h-[90%]  rounded-full `}

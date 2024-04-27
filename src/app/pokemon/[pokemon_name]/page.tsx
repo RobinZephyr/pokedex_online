@@ -6,6 +6,7 @@ import { pokeType, shiny_off, shiny_on } from "@/assets";
 import PokemonDetailsComponent from "@/components/details/PokemonDetails";
 import { pokemonBattlePlatforms } from "@/assets/lists/pokemonBattlePlatforms";
 import PokemonImage from "@/components/details/PokemonImage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface PokemonDetails {
   results: PokemonDetails[];
   id: number;
@@ -258,6 +259,7 @@ function Page() {
             (type) => !duplicateTypes.includes(type)
           );
           typeDamage.quadWeakTo.push(...duplicateTypes);
+          console.log(typeDamage);
           setTypeInteractions(typeDamage);
         }
 
@@ -265,6 +267,34 @@ function Page() {
         for (let i = 0; i < data.stats.length; i++) {
           totalBaseStat += data.stats[i].base_stat;
         }
+
+        data.abilities.map(async (ability, index) => {
+          try {
+            const abilityFetch = await fetch(
+              `https://pokeapi.co/api/v2/ability/${ability.ability.name}`
+            );
+            if (!abilityFetch.ok) {
+              throw new Error("Failed to fetch Pokemon data");
+            }
+            const abilityData = await abilityFetch.json();
+
+            const correspondingAbility = data.abilities.find(
+              (item) => item.ability.name === ability.ability.name
+            );
+
+            // Check if the corresponding ability object is found and if abilityData.effect_entries is not empty
+            if (
+              correspondingAbility &&
+              abilityData.effect_entries &&
+              abilityData.effect_entries.length > 1
+            ) {
+              correspondingAbility.ability.desc =
+                abilityData.effect_entries[1].short_effect;
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        });
 
         data.stats.total = totalBaseStat;
 
@@ -379,6 +409,121 @@ function Page() {
                   )}
                 </div>
                 <div className="w-[50%]"></div>
+              </div>
+
+              <div className="w-full pt-5">
+                <Tabs defaultValue="weakTo" className="w-full">
+                  <TabsList className="w-full grid-cols-2 grid bg-none">
+                    <TabsTrigger value="weakTo" className="text-lg p-0">
+                      Weakness
+                    </TabsTrigger>
+                    <TabsTrigger value="resistTo" className="text-lg p-0">
+                      Resistances
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="weakTo" className="pt-4">
+                    <div className="">
+                      <div className="flex-wrap flex justify-center   gap-4 w-full">
+                        {typeInteractions.weakTo.map((weak, index) => (
+                          <div
+                            key={index}
+                            className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
+                          >
+                            <Image
+                              src={pokeType[weak]}
+                              alt={weak}
+                              className="w-5 h-5  rounded-full object-cover"
+                            />
+                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
+                              {weak.toUpperCase()}
+                            </div>
+                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
+                              2x
+                            </div>
+                          </div>
+                        ))}
+                        {typeInteractions.quadWeakTo.map((weak, index) => (
+                          <div
+                            key={index}
+                            className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
+                          >
+                            <Image
+                              src={pokeType[weak]}
+                              alt={weak}
+                              className="w-5 h-5  rounded-full object-cover"
+                            />
+                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
+                              {weak.toUpperCase()}
+                            </div>
+                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
+                              4x
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="resistTo">
+                    <div className="pt-4">
+                      <div className="flex-wrap flex justify-center   gap-4 w-full">
+                        {typeInteractions.resistTo.map((resist, index) => (
+                          <div
+                            key={index}
+                            className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
+                          >
+                            <Image
+                              src={pokeType[resist]}
+                              alt={resist}
+                              className="w-5 h-5  rounded-full object-cover"
+                            />
+                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
+                              {resist.toUpperCase()}
+                            </div>
+                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
+                              2x
+                            </div>
+                          </div>
+                        ))}
+                        {typeInteractions.quadResistTo.map((resist, index) => (
+                          <div
+                            key={index}
+                            className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
+                          >
+                            <Image
+                              src={pokeType[resist]}
+                              alt={resist}
+                              className="w-5 h-5  rounded-full object-cover"
+                            />
+                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
+                              {resist.toUpperCase()}
+                            </div>
+                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
+                              4x
+                            </div>
+                          </div>
+                        ))}
+                        {typeInteractions.immuneTo.map((immune, index) => (
+                          <div
+                            key={index}
+                            className={`bg-${immune} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
+                          >
+                            <Image
+                              src={pokeType[immune]}
+                              alt={immune}
+                              className="w-5 h-5  rounded-full object-cover"
+                            />
+                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
+                              {immune.toUpperCase()}
+                            </div>
+                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
+                              0x
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
           </div>
