@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { FaHome } from "react-icons/fa";
 import Image from "next/image";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { pokeType, shiny_off, shiny_on } from "@/assets";
@@ -7,6 +9,10 @@ import PokemonDetailsComponent from "@/components/details/PokemonDetails";
 import { pokemonBattlePlatforms } from "@/assets/lists/pokemonBattlePlatforms";
 import PokemonImage from "@/components/details/PokemonImage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PokemonStats from "@/components/details/PokemonStats";
+import { TbArrowBackUpDouble } from "react-icons/tb";
+import { IoIosArrowBack } from "react-icons/io";
+import Link from "next/link";
 interface PokemonDetails {
   results: PokemonDetails[];
   id: number;
@@ -21,6 +27,8 @@ interface PokemonDetails {
   defaultSprite: string;
   shinySprite: string;
   abilities: Ability[];
+  abilityDesc: Ability[];
+  abilityNew: Ability[];
   types: Types[];
   spriteDisplay: string;
   sprites: {
@@ -37,6 +45,7 @@ interface Ability {
   ability: {
     name: string;
     url: string;
+    desc: string;
   };
   is_hidden: boolean;
   slot: number;
@@ -70,7 +79,7 @@ interface TypeDamage {
 
 function Page() {
   const [pokemon, setPokemon] = useState<PokemonDetails[]>([]);
-
+  const [abilityDesc, setAbilityDesc] = useState<PokemonDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [shinyOn, setShinyOn] = useState(false);
   const [typeInteractions, setTypeInteractions] = useState<TypeDamage>({
@@ -107,8 +116,11 @@ function Page() {
         }
 
         const speciesData = await species.json();
-        const genus = speciesData.genera[7].genus;
-
+        const genusEntry = speciesData.genera.find(
+          (entry: { language: { name: string } }) =>
+            entry.language.name === "en"
+        );
+        const genus = genusEntry ? genusEntry.genus : null;
         const flavorTextEntries = speciesData.flavor_text_entries;
         const englishFlavorText = flavorTextEntries.find(
           (entry: { language: { name: string } }) =>
@@ -160,10 +172,9 @@ function Page() {
               typeDamage.immuneTo.push(type.name);
             }
           );
-          console.log("Types weak to", typeDamage);
+
           setTypeInteractions(typeDamage);
         } else if (data.types.length !== 1) {
-          console.log("DUAL TYPE DUAL TYPE");
           const type1Data = data.types[0].type.name;
           const type2Data = data.types[1].type.name;
 
@@ -259,7 +270,24 @@ function Page() {
             (type) => !duplicateTypes.includes(type)
           );
           typeDamage.quadWeakTo.push(...duplicateTypes);
-          console.log(typeDamage);
+
+          const duplicateTypes2: string[] = []; // Array to store duplicate types
+
+          // Check for duplicate types in weakTo
+          typeDamage.resistTo.forEach((type, index) => {
+            if (
+              typeDamage.resistTo.indexOf(type) !== index &&
+              !duplicateTypes2.includes(type)
+            ) {
+              duplicateTypes2.push(type); // Add the duplicate type to the array
+            }
+          });
+
+          typeDamage.resistTo = typeDamage.resistTo.filter(
+            (type) => !duplicateTypes2.includes(type)
+          );
+          typeDamage.quadResistTo.push(...duplicateTypes2);
+
           setTypeInteractions(typeDamage);
         }
 
@@ -267,39 +295,49 @@ function Page() {
         for (let i = 0; i < data.stats.length; i++) {
           totalBaseStat += data.stats[i].base_stat;
         }
+        const newAbility: Ability[] = [];
 
-        data.abilities.map(async (ability, index) => {
-          try {
-            const abilityFetch = await fetch(
-              `https://pokeapi.co/api/v2/ability/${ability.ability.name}`
-            );
-            if (!abilityFetch.ok) {
-              throw new Error("Failed to fetch Pokemon data");
+        data.abilities.map(
+          async (ability: { ability: { name: any } }, index: any) => {
+            try {
+              const abilityFetch = await fetch(
+                `https://pokeapi.co/api/v2/ability/${ability.ability.name}`
+              );
+              if (!abilityFetch.ok) {
+                throw new Error("Failed to fetch Pokemon data");
+              }
+              const abilityData = await abilityFetch.json();
+
+              const enEffectEntry = abilityData.flavor_text_entries.find(
+                (entry: { language: { name: string } }) =>
+                  entry.language.name === "en"
+              );
+
+              const correspondingAbility = data.abilities.find(
+                (item: { ability: { name: any } }) =>
+                  item.ability.name === ability.ability.name
+              );
+
+              if (enEffectEntry) {
+                const correspondingAbility = data.abilities.find(
+                  (item: { ability: { name: any } }) =>
+                    item.ability.name === ability.ability.name
+                );
+                correspondingAbility.ability.desc = enEffectEntry.flavor_text;
+                newAbility.push(correspondingAbility);
+              } else {
+              }
+            } catch (error) {
+              console.error(error);
             }
-            const abilityData = await abilityFetch.json();
-
-            const correspondingAbility = data.abilities.find(
-              (item) => item.ability.name === ability.ability.name
-            );
-
-            // Check if the corresponding ability object is found and if abilityData.effect_entries is not empty
-            if (
-              correspondingAbility &&
-              abilityData.effect_entries &&
-              abilityData.effect_entries.length > 1
-            ) {
-              correspondingAbility.ability.desc =
-                abilityData.effect_entries[1].short_effect;
-            }
-          } catch (error) {
-            console.error(error);
           }
-        });
+        );
 
+        setAbilityDesc(data.abilities);
+        data.abilities.desc = newAbility;
+        data.abilityNew = newAbility;
         data.stats.total = totalBaseStat;
-
         const array: PokemonDetails[] = [data];
-        console.log(data);
 
         setPokemon(array);
       } catch (error) {
@@ -354,180 +392,121 @@ function Page() {
     [0, 250, 0], // Green
   ];
 
+  const handlePrev = () => {
+    const prevId = pokemon[0].id - 1;
+    if (prevId >= 1) {
+      window.location.href = `/pokemon/${prevId}`;
+    }
+  };
+  const handleNext = () => {
+    const nextId = pokemon[0].id + 1;
+    if (nextId >= 1) {
+      window.location.href = `/pokemon/${nextId}`;
+    }
+  };
   return (
-    <div className="px-[10px] md:px-[50px] my-[50px] w-full h-full">
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="block lg:hidden md:col-span-2  h-full">
+    <div className=" w-full h-full">
+      <div className=" px-[10px] md:px-[50px] my-[50px] gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+        <div className="md:col-span-2 lg:hidden">
           <PokemonImage pokemon={pokemon[0]} />
+        </div>
+
+        {/* Small Window */}
+        <div className="w-full flex md:hidden  justify-center">
+          <Tabs defaultValue="details" className="w-full max-w-[30rem]">
+            <TabsList className="w-full">
+              <TabsTrigger className="w-full" value="details">
+                Details
+              </TabsTrigger>
+              <TabsTrigger className="w-full" value="stats">
+                Stats
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="details">
+              <div className="">
+                <PokemonDetailsComponent pokemon={pokemon[0]} />
+              </div>
+            </TabsContent>
+            <TabsContent value="stats">
+              {" "}
+              <div className="">
+                <PokemonStats
+                  pokemon={pokemon}
+                  typeInteractions={typeInteractions}
+                  pokeType={pokeType}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Pokemon Details */}
-        <PokemonDetailsComponent pokemon={pokemon[0]} />
-
-        {/* Pokemon Image */}
-        <div className="lg:flex justify-center hidden h-full  items-center">
+        <div className="hidden w-full md:flex">
+          <PokemonDetailsComponent
+            abilityDesc={abilityDesc}
+            pokemon={pokemon[0]}
+          />
+        </div>
+        {/* Pokemon Image Desktop */}
+        <div className=" justify-center hidden  items-center lg:flex">
           <PokemonImage pokemon={pokemon[0]} />
         </div>
 
-        <div className="text-white mina-regular tracking-widest space-y-5  flex-col shadow-md bg-pkdBlue bg-opacity-60 p-4 h-full rounded-md ">
-          <div>
-            <div className="text-3xl">Stats</div>
-            <div className="pt-3 text-xl space-y-1">
-              {pokemon[0].stats.map((stats, index) => (
-                <div key={index} className="flex space-x-2 ">
-                  <div className=" w-[30%] whitespace-nowrap tracking-wider flex  items-center justify-end">
-                    {stats.stat.name === "special-attack"
-                      ? "SP. ATK."
-                      : stats.stat.name === "special-defense"
-                      ? "SP. DEF."
-                      : stats.stat.name.toLocaleUpperCase()}
-                  </div>
-                  <div className="w-[15%] flex justify-center  items-center h-full">
-                    {" "}
-                    {stats.base_stat}
-                  </div>
-                  <div className="w-[50%] flex  items-center">
-                    <div
-                      className="h-1 rounded-full shadow-md"
-                      style={{
-                        width: `${Math.min(stats.base_stat, 100)}%`,
-                        background: interpolateColor(
-                          stats.base_stat,
-                          colorScale
-                        ),
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="flex space-x-2  text-2xl pt-2">
-                <div className="w-[30%] text-end">Total</div>
-                <div className="w-[15%] text-center">
-                  {pokemon[0].stats.reduce(
-                    (total, stat) => total + stat.base_stat,
-                    0
-                  )}
-                </div>
-                <div className="w-[50%]"></div>
-              </div>
+        <div className="hidden w-full md:flex">
+          <PokemonStats
+            pokemon={pokemon}
+            typeInteractions={typeInteractions}
+            pokeType={pokeType}
+          />
+        </div>
+      </div>
 
-              <div className="w-full pt-5">
-                <Tabs defaultValue="weakTo" className="w-full">
-                  <TabsList className="w-full grid-cols-2 grid bg-none">
-                    <TabsTrigger value="weakTo" className="text-lg p-0">
-                      Weakness
-                    </TabsTrigger>
-                    <TabsTrigger value="resistTo" className="text-lg p-0">
-                      Resistances
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="weakTo" className="pt-4">
-                    <div className="">
-                      <div className="flex-wrap flex justify-center   gap-4 w-full">
-                        {typeInteractions.weakTo.map((weak, index) => (
-                          <div
-                            key={index}
-                            className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
-                          >
-                            <Image
-                              src={pokeType[weak]}
-                              alt={weak}
-                              className="w-5 h-5  rounded-full object-cover"
-                            />
-                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
-                              {weak.toUpperCase()}
-                            </div>
-                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
-                              2x
-                            </div>
-                          </div>
-                        ))}
-                        {typeInteractions.quadWeakTo.map((weak, index) => (
-                          <div
-                            key={index}
-                            className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
-                          >
-                            <Image
-                              src={pokeType[weak]}
-                              alt={weak}
-                              className="w-5 h-5  rounded-full object-cover"
-                            />
-                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
-                              {weak.toUpperCase()}
-                            </div>
-                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
-                              4x
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="resistTo">
-                    <div className="pt-4">
-                      <div className="flex-wrap flex justify-center   gap-4 w-full">
-                        {typeInteractions.resistTo.map((resist, index) => (
-                          <div
-                            key={index}
-                            className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
-                          >
-                            <Image
-                              src={pokeType[resist]}
-                              alt={resist}
-                              className="w-5 h-5  rounded-full object-cover"
-                            />
-                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
-                              {resist.toUpperCase()}
-                            </div>
-                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
-                              2x
-                            </div>
-                          </div>
-                        ))}
-                        {typeInteractions.quadResistTo.map((resist, index) => (
-                          <div
-                            key={index}
-                            className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
-                          >
-                            <Image
-                              src={pokeType[resist]}
-                              alt={resist}
-                              className="w-5 h-5  rounded-full object-cover"
-                            />
-                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
-                              {resist.toUpperCase()}
-                            </div>
-                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
-                              4x
-                            </div>
-                          </div>
-                        ))}
-                        {typeInteractions.immuneTo.map((immune, index) => (
-                          <div
-                            key={index}
-                            className={`bg-${immune} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] `}
-                          >
-                            <Image
-                              src={pokeType[immune]}
-                              alt={immune}
-                              className="w-5 h-5  rounded-full object-cover"
-                            />
-                            <div className="flex tracking-tight   text-sm item-center w-full justify-center pt-1">
-                              {immune.toUpperCase()}
-                            </div>
-                            <div className="justify-end w-5 h-5  rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px]  flex item-center ">
-                              0x
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+      <div className="bg-white px-[10px] md:px-[50px]  flex justify-center items-center mt-auto h-12 w-full absolute">
+        <div className="flex justify-start w-6">
+          <Link href="/">
+            <button
+              className={`bg-green-700 flex justify-center items-center hover:bg-green-900 animated text-green-700 rounded-sm w-6 h-6 `}
+            >
+              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
+                <FaHome />
               </div>
+            </button>
+          </Link>
+        </div>
+
+        <div className="w-full flex justify-center">
+          <div className="space-x-2 bg-pkdBlue bg-opacity-50 p-1 rounded-sm shadow-md flex items-center h-fit">
+            <button
+              disabled={pokemon[0].id === 1}
+              onClick={handlePrev}
+              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
+                pokemon[0].id === 1 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+            >
+              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
+                <IoIosArrowBack />
+              </div>
+            </button>
+
+            <div className="p-1  h-6 flex items-center text-white">
+              {pokemon[0].dexNumber}
             </div>
+
+            <button
+              onClick={handleNext}
+              disabled={pokemon[0].id === 1025}
+              className={`bg-green-500 flex justify-center items-center hover:bg-green-700 animated text-green-500 rounded-sm w-6 h-6 ${
+                pokemon[0].id === 1025 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              style={{ transform: "rotate(180deg)" }}
+            >
+              <div className="bg-white w-5 h-5 rounded-full flex justify-center items-center text-lg">
+                <IoIosArrowBack />
+              </div>
+            </button>
           </div>
         </div>
+        <div className="w-6"> </div>
       </div>
     </div>
   );

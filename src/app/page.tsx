@@ -346,7 +346,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    console.log(toSearch);
     if (toSearch) {
       setListPokemon(Array.isArray(toSearch) ? toSearch : [toSearch]);
     }
