@@ -232,6 +232,7 @@ export default function Home() {
       setOffset(selectedOption.offset);
     }
   };
+
   const generatePageOptions = () => {
     const totalCount = fetchData ? fetchData.count : 0;
     const totalPages = selectedType === "all" ? 103 : allPokemonType.count || 0;
@@ -377,7 +378,6 @@ export default function Home() {
   });
 
   const perPage = 10;
-  // Savepoint
   const handleTypeChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -400,7 +400,6 @@ export default function Home() {
         }
         const data = await response.json();
         const fetchedPokemon: any[] = [];
-
         if (Array.isArray(data.pokemon)) {
           const fetchPokemonDetails = async (pokemonArray: any[]) => {
             const urls = pokemonArray.map((pokemon) => pokemon.pokemon.url);
@@ -425,7 +424,6 @@ export default function Home() {
                   };
                 }
               );
-              // Further processing...
             } catch (error) {
               console.error(
                 "Failed to fetch or process Pokemon details",
@@ -435,12 +433,17 @@ export default function Home() {
             }
           }
 
-          const pokemonResults2 = data.pokemon.map(
-            ({ pokemon }: { pokemon: MyPokemonType }) => ({
-              name: pokemon.name,
-              url: pokemon.url,
+          const pokemonResults2 = data.pokemon
+            .map(({ pokemon }: { pokemon: MyPokemonType }) => {
+              const idFromUrl = pokemon.url.split("/").filter(Boolean).pop();
+              if (idFromUrl && idFromUrl.length === 5) return null;
+
+              return {
+                name: pokemon.name,
+                url: pokemon.url,
+              };
             })
-          );
+            .filter(Boolean);
 
           const filteredPokemon = pokemonResults2.filter(
             (pokemon: { name: any }) => fetchedPokemon.includes(pokemon.name)
@@ -463,14 +466,13 @@ export default function Home() {
             count: chunkedPokemon.length,
             results: chunkedPokemon,
           };
-
           const firstPageData = {
             count: chunkedPokemon.length,
             results: chunkedPokemon[0] || [],
           };
           setCurrentPage(1);
 
-          setFetchData(firstPageData); // Set data here
+          setFetchData(firstPageData);
 
           setAllPokemonType(arrayPokemon);
         } else {
