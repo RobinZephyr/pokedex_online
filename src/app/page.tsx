@@ -402,7 +402,7 @@ export default function Home() {
         const fetchedPokemon: any[] = [];
 
         if (Array.isArray(data.pokemon)) {
-          const fetchPokemonDetails = async (pokemonArray) => {
+          const fetchPokemonDetails = async (pokemonArray: any[]) => {
             const urls = pokemonArray.map((pokemon) => pokemon.pokemon.url);
             const requests = urls.map((url) =>
               fetch(url).then((res) => res.json())
