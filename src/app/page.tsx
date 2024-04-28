@@ -415,6 +415,10 @@ export default function Home() {
               if (pokemonData.dexNumber.length === 5) {
                 fetchedPokemon.push(pokemonData.name);
               }
+
+              if (fetchedPokemon.length === 9) {
+                console.log("firstPge");
+              }
             } catch (error) {
               setLoading(false);
             }
@@ -455,7 +459,7 @@ export default function Home() {
           };
           setCurrentPage(1);
 
-          setFetchData(firstPageData);
+          setFetchData(firstPageData); // Set data here
 
           setAllPokemonType(arrayPokemon);
         } else {
@@ -463,6 +467,8 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Error fetching Pokemon data:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
