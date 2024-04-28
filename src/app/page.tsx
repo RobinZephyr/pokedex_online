@@ -377,6 +377,7 @@ export default function Home() {
   });
 
   const perPage = 10;
+  // Savepoint
   const handleTypeChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -401,25 +402,35 @@ export default function Home() {
         const fetchedPokemon: any[] = [];
 
         if (Array.isArray(data.pokemon)) {
-          for (const pokemon of data.pokemon) {
+          const fetchPokemonDetails = async (pokemonArray) => {
+            const urls = pokemonArray.map((pokemon) => pokemon.pokemon.url);
+            const requests = urls.map((url) =>
+              fetch(url).then((res) => res.json())
+            );
+            return Promise.all(requests);
+          };
+
+          if (Array.isArray(data.pokemon)) {
             try {
-              const pokemonResponse = await fetch(pokemon.pokemon.url);
-              if (!pokemonResponse.ok) {
-                throw new Error("Failed to fetch Pokemon details");
-              }
-              const pokemonData = await pokemonResponse.json();
-              const formattedOrder = String(pokemonData.id).padStart(3, "0");
-
-              pokemon.dexNumber = formattedOrder;
-              pokemonData.dexNumber = formattedOrder;
-              if (pokemonData.dexNumber.length === 5) {
-                fetchedPokemon.push(pokemonData.name);
-              }
-
-              if (fetchedPokemon.length === 9) {
-                console.log("firstPge");
-              }
+              const pokemonDetails = await fetchPokemonDetails(data.pokemon);
+              const formattedPokemonDetails = pokemonDetails.map(
+                (pokemonData) => {
+                  const formattedOrder = String(pokemonData.id).padStart(
+                    3,
+                    "0"
+                  );
+                  return {
+                    ...pokemonData,
+                    dexNumber: formattedOrder,
+                  };
+                }
+              );
+              // Further processing...
             } catch (error) {
+              console.error(
+                "Failed to fetch or process Pokemon details",
+                error
+              );
               setLoading(false);
             }
           }
