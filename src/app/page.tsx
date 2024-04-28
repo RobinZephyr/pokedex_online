@@ -398,49 +398,44 @@ export default function Home() {
           throw new Error("Failed to fetch Pokemon data");
         }
         const data = await response.json();
-        const fetchedPokemon: any[] = [];
-
-        const allPokemon = data.pokemon;
-
-        if (Array.isArray(allPokemon)) {
-        }
 
         if (Array.isArray(data.pokemon)) {
-          for (const pokemon of data.pokemon) {
-            try {
-              const pokemonResponse = await fetch(pokemon.pokemon.url);
-              if (!pokemonResponse.ok) {
+          const pokemonUrls = data.pokemon.map(
+            (pokemon) => pokemon.pokemon.url
+          );
+          const pokemonResponses = await Promise.all(
+            pokemonUrls.map((url) => fetch(url))
+          );
+
+          const pokemonDataArray = await Promise.all(
+            pokemonResponses.map(async (res) => {
+              if (!res.ok) {
                 throw new Error("Failed to fetch Pokemon details");
               }
-              const pokemonData = await pokemonResponse.json();
+              const pokemonData = await res.json();
               const formattedOrder = String(pokemonData.id).padStart(3, "0");
-
-              pokemon.dexNumber = formattedOrder;
               pokemonData.dexNumber = formattedOrder;
-              if (pokemonData.dexNumber.length === 5) {
-                fetchedPokemon.push(pokemonData.name);
-              }
-            } catch (error) {
-              setLoading(false);
-            }
-          }
-
-          const allPokemon = data.pokemon;
-
-          const pokemonResults2 = data.pokemon.map(
-            ({ pokemon }: { pokemon: MyPokemonType }) => ({
-              name: pokemon.name,
-              url: pokemon.url,
+              return pokemonData;
             })
           );
 
-          const filteredPokemon = pokemonResults2.filter(
-            (pokemon: { name: any }) => fetchedPokemon.includes(pokemon.name)
+          const fetchedPokemon = pokemonDataArray
+            .filter((pokemon) => pokemon.dexNumber.length === 5)
+            .map((pokemon) => pokemon.name);
+
+          const pokemonResults2 = data.pokemon.map(({ pokemon }) => ({
+            name: pokemon.name,
+            url: pokemon.url,
+          }));
+
+          const filteredPokemon = pokemonResults2.filter((pokemon) =>
+            fetchedPokemon.includes(pokemon.name)
           );
+
           const remainingPokemon = pokemonResults2.filter(
-            (pokemon: { name: any }) =>
+            (pokemon) =>
               !filteredPokemon.find(
-                (filtered: { name: any }) => filtered.name === pokemon.name
+                (filtered) => filtered.name === pokemon.name
               )
           );
 
@@ -451,7 +446,7 @@ export default function Home() {
             (_, index) =>
               remainingPokemon.slice(index * perPage, (index + 1) * perPage)
           );
-          const arrayPokemon: { count: number; results: any[] } = {
+          const arrayPokemon = {
             count: chunkedPokemon.length,
             results: chunkedPokemon,
           };
@@ -463,13 +458,14 @@ export default function Home() {
           setCurrentPage(1);
 
           setFetchData(firstPageData);
-
           setAllPokemonType(arrayPokemon);
         } else {
           console.error("Pokemon data is not in the expected format.");
         }
       } catch (error) {
         console.error("Error fetching Pokemon data:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
