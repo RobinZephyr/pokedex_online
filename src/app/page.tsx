@@ -1,18 +1,11 @@
 "use client";
-import Header from "@/components/home/Header";
 import Pagination from "@/components/home/Pagination";
 import PokemonCard from "@/components/home/PokemoCard";
-import Image from "next/image";
 import SearchBar from "@/components/home/SearchBar";
-import { IoIosArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { TbArrowBackUpDouble } from "react-icons/tb";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import { pokeType } from "../assets/index.ts";
 import { StaticImageData } from "next/image";
-import { wooden_background } from "@/assets";
-import { PokemonTypes } from "@/assets/lists/pokemonType";
 import Link from "next/link";
 const typeIcons: { [key: string]: string | StaticImageData } = pokeType;
 

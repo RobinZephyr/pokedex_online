@@ -15,6 +15,7 @@ import { TbPokeball } from "react-icons/tb";
 import Link from "next/link";
 interface PokemonImageProps {
   pokemon: PokemonDetails;
+  currentPokemon: number;
 }
 interface PokemonDetails {
   id: number;
@@ -26,6 +27,7 @@ interface PokemonDetails {
   dexNumber: string;
   height: number;
   species: any;
+  pokemon: PokemonDetails[];
   weight: number;
   variations: Varieties[];
   types: Types[];
@@ -47,10 +49,7 @@ interface Varieties {
     url: string;
   };
 }
-const PokemonImage: React.FC<PokemonImageProps> = ({
-  pokemon,
-  currentPokemon,
-}) => {
+const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
   const [shinyOn, setShinyOn] = useState(false);
 
   const handleShinyOn = () => {

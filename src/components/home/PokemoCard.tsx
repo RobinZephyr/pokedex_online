@@ -57,7 +57,7 @@ function PokemonCard({ pokemon }: PokemonCardProps) {
           {pokemon.types.length > 0 && (
             <div className="absolute inset-0 z-0 ">
               <Image
-                src={typeImageUrl} // Use typeImageUrl as the src
+                src={typeImageUrl}
                 alt={pokemon.types[0].type.name}
                 className="object-cover"
               />

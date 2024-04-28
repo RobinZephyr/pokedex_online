@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/hover-card";
 
 interface Props {
-  pokemon: PokemonDetails;
+  pokemon: PokemonDetails2;
 }
 
-interface PokemonDetails {
+interface PokemonDetails2 {
   id: number;
   name: string;
   genus: string;
@@ -21,9 +21,18 @@ interface PokemonDetails {
   dexNumber: string;
   height: number;
   weight: number;
-  abilities: Ability[];
   abilityNew: Ability[];
   types: Types[];
+  abilities: Ability[];
+  correspondingAbility: string[];
+}
+interface BaseAbility {
+  ability: {
+    name: string;
+    url: string;
+  };
+  is_hidden: boolean;
+  slot: number;
 }
 
 interface Ability {
@@ -34,6 +43,7 @@ interface Ability {
   };
   is_hidden: boolean;
   slot: number;
+
   correspondingAbility: string[];
 }
 
@@ -55,8 +65,6 @@ interface EnhancedAbility {
   slot: number;
 }
 function PokemonDetailsComponent({ pokemon }: Props) {
-  const [abilitiesLoaded, setAbilitiesLoaded] = useState(false);
-
   function convert(value: number) {
     return (value / 10).toFixed(1);
   }
@@ -79,7 +87,8 @@ function PokemonDetailsComponent({ pokemon }: Props) {
             }
             const abilityData = await response.json();
             const enEffectEntry = abilityData.flavor_text_entries.find(
-              (entry) => entry.language.name === "en"
+              (entry: { language: { name: string } }) =>
+                entry.language.name === "en"
             );
 
             return {

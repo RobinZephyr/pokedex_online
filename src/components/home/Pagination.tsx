@@ -2,7 +2,18 @@ import React from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { TbArrowBackUpDouble } from "react-icons/tb";
 
-const Pagination = ({
+interface PaginationProps {
+  currentPage: number;
+  handleNextPage: () => void;
+  handleMaxNextPage: () => void;
+  handlePrevPage: () => void;
+  handleMaxPrevPage: () => void;
+  handlePageChange: (page: number) => void;
+  pages: { value: number; label: string }[];
+  offset: number;
+  lastPage: number;
+}
+const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   handleNextPage,
   handleMaxNextPage,

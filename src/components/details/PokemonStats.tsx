@@ -5,15 +5,15 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface PokemonStatsProps {
-  pokemon: any[]; // Define the type of the pokemon prop
-  typeInteractions: any; // Define the type of the typeInteractions prop
-  pokeType: any; // Define the type of the pokeType prop
+  pokemon: any[];
+  typeInteractions: any;
+  pokeType: any;
 }
 
 function interpolateColor(
   value: number,
-  colorScale: number[][][] | [any, any, any]
-) {
+  colorScale: [number, number, number][] // Adjusted type here
+): string {
   const [redColor, yellowColor, greenColor] = colorScale;
   let r, g, b;
 
@@ -31,13 +31,11 @@ function interpolateColor(
 
   return `rgb(${r}, ${g}, ${b})`;
 }
-
-const colorScale = [
+const colorScale: [number, number, number][] = [
   [255, 0, 0], // Red
   [255, 255, 0], // Yellow
   [0, 250, 0], // Green
 ];
-
 const PokemonStats: React.FC<PokemonStatsProps> = ({
   pokemon,
   typeInteractions,

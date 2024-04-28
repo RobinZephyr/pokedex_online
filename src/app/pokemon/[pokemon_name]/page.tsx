@@ -1,36 +1,34 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { FaHome } from "react-icons/fa";
-import Image from "next/image";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { pokeType, shiny_off, shiny_on } from "@/assets";
+import { pokeType } from "@/assets";
 import PokemonDetailsComponent from "@/components/details/PokemonDetails";
-import { pokemonBattlePlatforms } from "@/assets/lists/pokemonBattlePlatforms";
 import PokemonImage from "@/components/details/PokemonImage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PokemonStats from "@/components/details/PokemonStats";
-import { TbArrowBackUpDouble } from "react-icons/tb";
-import { IoIosArrowBack } from "react-icons/io";
-import Link from "next/link";
 import PokemonDetailsPagination from "@/components/details/PokemonDetailsPagination";
 import FailedPagination from "@/components/details/FailedPagination";
+
 interface PokemonDetails {
   results: PokemonDetails[];
   id: number;
   name: string;
   url: string;
+  species: Species;
+  abilities: Ability[];
   genus: string;
   dexEntry: string;
   dexNumber: string;
   height: number;
+  pokemon: PokemonDetails[];
+  correspondingAbility: string[];
   weight: number;
   stats: Stats[];
   defaultSprite: string;
   shinySprite: string;
-  abilities: Ability[];
   abilityDesc: Ability[];
   abilityNew: Ability[];
+  variations: Varieties[];
   types: Types[];
   spriteDisplay: string;
   sprites: {
@@ -40,9 +38,12 @@ interface PokemonDetails {
       };
     };
   };
-  // Include other properties as needed
 }
-
+interface Species {
+  id: number;
+  name: string;
+  url: string;
+}
 interface Ability {
   ability: {
     name: string;
@@ -51,6 +52,7 @@ interface Ability {
   };
   is_hidden: boolean;
   slot: number;
+  correspondingAbility: string[];
 }
 
 interface Types {
@@ -155,17 +157,17 @@ function Page() {
         speciesData.varieties.forEach((variety: Varieties) => {
           const match = variety.pokemon.url.match(/pokemon\/(\d+)\//);
           if (match) {
-            variety.pokemon.id = Number(match[1]); // Ensure the id is set here
+            variety.pokemon.id = Number(match[1]);
           }
 
           const style = variety.pokemon.name.match(/-(.*)/);
           const namePartAfterDash = style ? style[1] : null;
           if (namePartAfterDash) {
-            variety.pokemon.form = String(namePartAfterDash); // Ensure the id is set here
+            variety.pokemon.form = String(namePartAfterDash);
           }
 
           if (!variety.is_default) {
-            nonDefaultVarieties.push(variety); // Push the variety with the id set
+            nonDefaultVarieties.push(variety);
           }
         });
 
@@ -289,7 +291,6 @@ function Page() {
             }
           );
 
-          // Clearning immune
           typeDamage.resistTo = typeDamage.resistTo.filter(
             (type) => !typeDamage.immuneTo.includes(type)
           );
@@ -307,15 +308,14 @@ function Page() {
             (type) => !commonTypes.includes(type)
           );
 
-          const duplicateTypes: string[] = []; // Array to store duplicate types
+          const duplicateTypes: string[] = [];
 
-          // Check for duplicate types in weakTo
           typeDamage.weakTo.forEach((type, index) => {
             if (
               typeDamage.weakTo.indexOf(type) !== index &&
               !duplicateTypes.includes(type)
             ) {
-              duplicateTypes.push(type); // Add the duplicate type to the array
+              duplicateTypes.push(type);
             }
           });
 
@@ -324,15 +324,14 @@ function Page() {
           );
           typeDamage.quadWeakTo.push(...duplicateTypes);
 
-          const duplicateTypes2: string[] = []; // Array to store duplicate types
+          const duplicateTypes2: string[] = [];
 
-          // Check for duplicate types in weakTo
           typeDamage.resistTo.forEach((type, index) => {
             if (
               typeDamage.resistTo.indexOf(type) !== index &&
               !duplicateTypes2.includes(type)
             ) {
-              duplicateTypes2.push(type); // Add the duplicate type to the array
+              duplicateTypes2.push(type);
             }
           });
 
@@ -364,11 +363,6 @@ function Page() {
               const enEffectEntry = abilityData.flavor_text_entries.find(
                 (entry: { language: { name: string } }) =>
                   entry.language.name === "en"
-              );
-
-              const correspondingAbility = data.abilities.find(
-                (item: { ability: { name: any } }) =>
-                  item.ability.name === ability.ability.name
               );
 
               if (enEffectEntry) {
@@ -403,63 +397,7 @@ function Page() {
 
     fetchPokemonData();
   }, []);
-  // if (!pokemon || pokemon.length === 0 || !failedFetch) {
-  //   return (
-  //     <div className="flex justify-center w-full h-[30rem] item-center ">
-  //       <div className="flex items-center text-[10rem] text-white">
-  //         <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
-  function convert(value: number) {
-    return (value / 10).toFixed(1);
-  }
-  function capitalizeFirstLetter(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  }
-
-  function interpolateColor(
-    value: number,
-    colorScale: number[][][] | [any, any, any]
-  ) {
-    const [redColor, yellowColor, greenColor] = colorScale;
-    let r, g, b;
-
-    if (value <= 50) {
-      const ratio = value / 50;
-      r = Math.round(redColor[0] + ratio * (yellowColor[0] - redColor[0]));
-      g = Math.round(redColor[1] + ratio * (yellowColor[1] - redColor[1]));
-      b = Math.round(redColor[2] + ratio * (yellowColor[2] - redColor[2]));
-    } else {
-      const ratio = (value - 50) / 50;
-      r = Math.round(yellowColor[0] + ratio * (greenColor[0] - yellowColor[0]));
-      g = Math.round(yellowColor[1] + ratio * (greenColor[1] - yellowColor[1]));
-      b = Math.round(yellowColor[2] + ratio * (greenColor[2] - yellowColor[2]));
-    }
-
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  const colorScale = [
-    [255, 0, 0], // Red
-    [255, 255, 0], // Yellow
-    [0, 250, 0], // Green
-  ];
-
-  const handlePrev = () => {
-    const prevId = pokemon[0].id - 1;
-    if (prevId >= 1) {
-      window.location.href = `/pokemon/${prevId}`;
-    }
-  };
-  const handleNext = () => {
-    const nextId = pokemon[0].id + 1;
-    if (nextId >= 1) {
-      window.location.href = `/pokemon/${nextId}`;
-    }
-  };
   return (
     <div>
       {!pokemon || pokemon.length === 0 ? (
@@ -515,10 +453,7 @@ function Page() {
 
                 {/* Pokemon Details */}
                 <div className="hidden w-full md:flex">
-                  <PokemonDetailsComponent
-                    abilityDesc={abilityDesc}
-                    pokemon={pokemon[0]}
-                  />
+                  <PokemonDetailsComponent pokemon={pokemon[0]} />
                 </div>
                 {/* Pokemon Image Desktop */}
                 <div className=" justify-center hidden  items-center lg:flex">
