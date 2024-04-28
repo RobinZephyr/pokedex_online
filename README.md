@@ -3,21 +3,28 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Getting Started
 
 First, install dependancies
-npm isntall
-# or
-yarn isntall
 
+
+## Installation
+
+First, install dependancies
+
+```bash
+  npm install 
+  or
+  yarn install
+  etc...
+```
+    
 Then run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+  npm run dev 
+  or
+  yarn dev
+  etc...
 ```
+    
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
