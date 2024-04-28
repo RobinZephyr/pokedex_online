@@ -44,7 +44,7 @@ export default function Home() {
   });
 
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [pageCount, setPageCount] = useState();
   const [lastPage, setLastPage] = useState(0);
   const initialFetch = async () => {
