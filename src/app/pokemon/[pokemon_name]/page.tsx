@@ -110,8 +110,8 @@ function Page() {
     setShinyOn(!shinyOn);
   };
 
-  const [maxId, setMaxId] = useState();
-  const [currentPokemon, setCurrentPokemon] = useState();
+  const [maxId, setMaxId] = useState(0);
+  const [currentPokemon, setCurrentPokemon] = useState(0);
   useEffect(() => {
     setFailedFetch(false);
     setLoading(true);
