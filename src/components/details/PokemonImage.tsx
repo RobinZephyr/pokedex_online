@@ -3,7 +3,16 @@ import Image from "next/image";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { shiny_off, shiny_on } from "@/assets";
 import { pokemonBattlePlatforms } from "@/assets/lists/pokemonBattlePlatforms";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { TbPokeball } from "react-icons/tb";
+import Link from "next/link";
 interface PokemonImageProps {
   pokemon: PokemonDetails;
 }
@@ -16,7 +25,9 @@ interface PokemonDetails {
   shinySprite: string;
   dexNumber: string;
   height: number;
+  species: any;
   weight: number;
+  variations: Varieties[];
   types: Types[];
 }
 interface Types {
@@ -26,7 +37,20 @@ interface Types {
     url: string;
   };
 }
-const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
+
+interface Varieties {
+  is_default: boolean;
+  pokemon: {
+    id?: number;
+    form?: string;
+    name: string;
+    url: string;
+  };
+}
+const PokemonImage: React.FC<PokemonImageProps> = ({
+  pokemon,
+  currentPokemon,
+}) => {
   const [shinyOn, setShinyOn] = useState(false);
 
   const handleShinyOn = () => {
@@ -43,6 +67,11 @@ const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
     );
   }
 
+  function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+  const match = pokemon.species.url.match(/pokemon-species\/(\d+)\//);
+  const pokemonSpeciesId = match[1];
   return (
     <div className="flex items-center justify-center">
       <div className="w-[300px] h-[300px] absolute flex justify-end">
@@ -58,12 +87,43 @@ const PokemonImage: React.FC<PokemonImageProps> = ({ pokemon }) => {
             height={50}
           />
         </div>
+        {pokemon.variations.length !== 0 && (
+          <div className="absolute inset-0 flex justify-center items-center">
+            <div className="mr-auto mb-auto" style={{ zIndex: 2 }}>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="bg-pink-200 rounded-md text-pink-200 p-1 hover:bg-pink-200 hover:text-pink-200 animated shadow-sm"
+                  title="Altername Forms"
+                >
+                  <TbPokeball className="text-3xl  bg-white rounded-full" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-[10rem] overflow-y-auto">
+                  <DropdownMenuLabel>Alternate Forms</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link href={`/pokemon/${pokemonSpeciesId}`}>Default</Link>
+                  </DropdownMenuItem>
+                  {pokemon.variations.map((variation, index) => (
+                    <div className={`texl-sm`} key={index}>
+                      <DropdownMenuItem>
+                        <Link href={`/pokemon/${variation.pokemon.id}`}>
+                          {capitalizeFirstLetter(
+                            String(variation.pokemon.form)
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        )}
       </div>
 
       <img
-        width={290}
-        height={290}
-        className=" pb-0"
+        width={300}
+        height={300}
         src={!shinyOn ? pokemon.defaultSprite : pokemon.shinySprite}
         alt={pokemon.name}
       />

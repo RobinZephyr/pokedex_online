@@ -14,6 +14,7 @@ import { TbArrowBackUpDouble } from "react-icons/tb";
 import { IoIosArrowBack } from "react-icons/io";
 import Link from "next/link";
 import PokemonDetailsPagination from "@/components/details/PokemonDetailsPagination";
+import FailedPagination from "@/components/details/FailedPagination";
 interface PokemonDetails {
   results: PokemonDetails[];
   id: number;
@@ -74,6 +75,7 @@ interface Varieties {
   is_default: boolean;
   pokemon: {
     id?: number;
+    speciesId?: number;
     form?: string;
     name: string;
     url: string;
@@ -93,6 +95,7 @@ function Page() {
   const [abilityDesc, setAbilityDesc] = useState<PokemonDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [shinyOn, setShinyOn] = useState(false);
+  const [failedFetch, setFailedFetch] = useState(false);
   const [typeInteractions, setTypeInteractions] = useState<TypeDamage>({
     weakTo: [],
     quadWeakTo: [],
@@ -108,6 +111,8 @@ function Page() {
   const [maxId, setMaxId] = useState(1025);
   const [currentPokemon, setCurrentPokemon] = useState(1025);
   useEffect(() => {
+    setFailedFetch(false);
+    setLoading(true);
     const fetchPokemonData = async () => {
       const currentUrl = window.location.href;
       const parts = currentUrl.split("/");
@@ -119,7 +124,11 @@ function Page() {
           `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch Pokemon data");
+          setLoading(false);
+          setFailedFetch(true);
+          console.log("FAILED FETCH ");
+          throw new Error("Failed to fetch Pokemon Species");
+          return;
         }
         const data = await response.json();
         let pokemonSpecies = 0;
@@ -386,6 +395,7 @@ function Page() {
         const array: PokemonDetails[] = [data];
 
         setPokemon(array);
+        setLoading(false);
       } catch (error) {
         console.error(error);
       }
@@ -393,15 +403,15 @@ function Page() {
 
     fetchPokemonData();
   }, []);
-  if (!pokemon || pokemon.length === 0) {
-    return (
-      <div className="flex justify-center w-full h-[30rem] item-center ">
-        <div className="flex items-center text-[10rem] text-white">
-          <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
-        </div>
-      </div>
-    );
-  }
+  // if (!pokemon || pokemon.length === 0 || !failedFetch) {
+  //   return (
+  //     <div className="flex justify-center w-full h-[30rem] item-center ">
+  //       <div className="flex items-center text-[10rem] text-white">
+  //         <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   function convert(value: number) {
     return (value / 10).toFixed(1);
@@ -451,63 +461,92 @@ function Page() {
     }
   };
   return (
-    <div className=" w-full h-full">
-      <div className=" px-[10px] md:px-[50px] my-[50px] gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
-        <div className="md:col-span-2 lg:hidden">
-          <PokemonImage pokemon={pokemon[0]} />
+    <div>
+      {!pokemon || pokemon.length === 0 ? (
+        <div className="flex justify-center w-full h-[30rem] item-center ">
+          {failedFetch ? (
+            <FailedPagination />
+          ) : (
+            <div className="flex items-center text-[10rem] text-white">
+              <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+            </div>
+          )}
         </div>
+      ) : (
+        <div className="w-full h-full flex justify-center">
+          {!failedFetch && pokemon.length !== 0 ? (
+            <div className=" w-full h-full">
+              <div className=" px-[10px] md:px-[50px] my-[50px] gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+                <div className="md:col-span-2 lg:hidden">
+                  <PokemonImage
+                    pokemon={pokemon[0]}
+                    currentPokemon={currentPokemon}
+                  />
+                </div>
 
-        {/* Small Window */}
-        <div className="w-full flex md:hidden  justify-center">
-          <Tabs defaultValue="details" className="w-full max-w-[30rem]">
-            <TabsList className="w-full">
-              <TabsTrigger className="w-full" value="details">
-                Details
-              </TabsTrigger>
-              <TabsTrigger className="w-full" value="stats">
-                Stats
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="details">
-              <div className="">
-                <PokemonDetailsComponent pokemon={pokemon[0]} />
+                {/* Small Window */}
+                <div className="w-full flex md:hidden  justify-center">
+                  <Tabs defaultValue="details" className="w-full max-w-[30rem]">
+                    <TabsList className="w-full">
+                      <TabsTrigger className="w-full" value="details">
+                        Details
+                      </TabsTrigger>
+                      <TabsTrigger className="w-full" value="stats">
+                        Stats
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details">
+                      <div className="">
+                        <PokemonDetailsComponent pokemon={pokemon[0]} />
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="stats">
+                      {" "}
+                      <div className="">
+                        <PokemonStats
+                          pokemon={pokemon}
+                          typeInteractions={typeInteractions}
+                          pokeType={pokeType}
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                {/* Pokemon Details */}
+                <div className="hidden w-full md:flex">
+                  <PokemonDetailsComponent
+                    abilityDesc={abilityDesc}
+                    pokemon={pokemon[0]}
+                  />
+                </div>
+                {/* Pokemon Image Desktop */}
+                <div className=" justify-center hidden  items-center lg:flex">
+                  <PokemonImage
+                    pokemon={pokemon[0]}
+                    currentPokemon={currentPokemon}
+                  />
+                </div>
+
+                <div className="hidden w-full md:flex">
+                  <PokemonStats
+                    pokemon={pokemon}
+                    typeInteractions={typeInteractions}
+                    pokeType={pokeType}
+                  />
+                </div>
               </div>
-            </TabsContent>
-            <TabsContent value="stats">
-              {" "}
-              <div className="">
-                <PokemonStats
-                  pokemon={pokemon}
-                  typeInteractions={typeInteractions}
-                  pokeType={pokeType}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
 
-        {/* Pokemon Details */}
-        <div className="hidden w-full md:flex">
-          <PokemonDetailsComponent
-            abilityDesc={abilityDesc}
-            pokemon={pokemon[0]}
-          />
+              <PokemonDetailsPagination
+                pokemonId={currentPokemon}
+                maxId={maxId}
+              />
+            </div>
+          ) : (
+            <FailedPagination />
+          )}
         </div>
-        {/* Pokemon Image Desktop */}
-        <div className=" justify-center hidden  items-center lg:flex">
-          <PokemonImage pokemon={pokemon[0]} />
-        </div>
-
-        <div className="hidden w-full md:flex">
-          <PokemonStats
-            pokemon={pokemon}
-            typeInteractions={typeInteractions}
-            pokeType={pokeType}
-          />
-        </div>
-      </div>
-
-      <PokemonDetailsPagination pokemonId={currentPokemon} maxId={maxId} />
+      )}
     </div>
   );
 }

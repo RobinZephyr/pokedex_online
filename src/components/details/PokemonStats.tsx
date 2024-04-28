@@ -1,6 +1,6 @@
 // PokemonStats.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
@@ -99,7 +99,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                       (weak: string, index: number) => (
                         <div
                           key={index}
-                          className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
+                          className={`bg-${weak} gap-1 flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
                         >
                           <Image
                             src={pokeType[weak]}
@@ -119,7 +119,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                       (weak: string, index: number) => (
                         <div
                           key={index}
-                          className={`bg-${weak} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
+                          className={`bg-${weak} flex gap-1 items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
                         >
                           <Image
                             src={pokeType[weak]}
@@ -140,12 +140,12 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
               </TabsContent>
               <TabsContent value="resistTo">
                 <div className="pt-4">
-                  <div className="flex-wrap flex justify-center gap-4 w-full">
+                  <div className="flex-wrap  flex justify-center gap-4 w-full">
                     {typeInteractions.resistTo.map(
                       (resist: string, index: number) => (
                         <div
                           key={index}
-                          className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
+                          className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px] gap-1 `}
                         >
                           <Image
                             src={pokeType[resist]}
@@ -155,7 +155,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                           <div className="flex tracking-tight text-sm item-center w-full justify-center pt-1">
                             {resist.toUpperCase()}
                           </div>
-                          <div className="justify-end w-5 h-5 text-[8px] rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px] flex item-center">
+                          <div className="justify-end h-5 text-[8px] rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px] flex item-center">
                             x0.5
                           </div>
                         </div>
@@ -166,7 +166,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                       (resist: string, index: number) => (
                         <div
                           key={index}
-                          className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
+                          className={`bg-${resist} flex items-center px-[3px] py-[2px] rounded-full  text-[1rem] min-w-[100px] gap-1`}
                         >
                           <Image
                             src={pokeType[resist]}
@@ -176,7 +176,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                           <div className="flex tracking-tight text-sm item-center w-full justify-center pt-1">
                             {resist.toUpperCase()}
                           </div>
-                          <div className=" text-[7px] justify-end w-5 h-5 rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px] flex item-center">
+                          <div className="  justify-end h-5 rounded-full bg-white tracking-tighter p-[2px] text-xs text-black border-[1px] flex item-center">
                             x0.25
                           </div>
                         </div>
@@ -186,7 +186,7 @@ const PokemonStats: React.FC<PokemonStatsProps> = ({
                       (immune: string, index: number) => (
                         <div
                           key={index}
-                          className={`bg-${immune} flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
+                          className={`bg-${immune} gap-1  flex items-center px-[3px] py-[2px] rounded-full text-[1rem] min-w-[100px]`}
                         >
                           <Image
                             src={pokeType[immune]}
