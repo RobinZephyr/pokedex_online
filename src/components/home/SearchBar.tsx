@@ -30,13 +30,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   handleTypeChange,
 }) => {
   return (
-    <div className="w-fit bg-pkdBlue bg-opacity-60 rounded-sm p-2 flex items-center space-x-4 ">
-      <div className="h-full flex item-center space-x-2">
+    <div className="w-fit gap-1 bg-pkdBlue bg-opacity-60 rounded-sm p-2 flex items-center md:space-x-4 ">
+      <div className="h-full flex item-center gap-1 md:space-x-2">
         <input
           onChange={handleSearchInput}
           value={searchTermShow}
           placeholder="Search "
-          className=" rounded-sm tracking-widest h-8   p-1 w-full md:w-60 mina-regular shadow-sm "
+          className=" rounded-sm tracking-widest h-8   p-1 w-full  md:w-60 mina-regular shadow-sm "
         />
 
         <button
@@ -48,7 +48,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </button>
       </div>
 
-      <div className=" flex space-x-2 ">
+      <div className=" flex md:space-x-2 gap-1  ">
         <select
           className="h-8 rounded-md mina-regular flex items-center"
           value={selectedType}
@@ -61,7 +61,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             </option>
           ))}
         </select>
-        {/* Checkpoint */}
         {selectedType !== "all" ? (
           <Image
             src={typeIcons[selectedType.toLowerCase()]}

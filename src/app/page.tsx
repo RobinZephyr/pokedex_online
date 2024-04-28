@@ -252,32 +252,54 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     setSearchFailed("");
+
     const fetchPokemonDetails = async () => {
       const pokemonDetails: MyPokemonType[] = [];
+      const fetchedPokemonData: { [url: string]: MyPokemonType } = {}; // Cache for fetched Pokemon data
 
-      for (const pokemon of fetchData.results) {
-        try {
-          const pokemonResponse = await fetch(pokemon.url);
-          if (!pokemonResponse.ok) {
-            throw new Error("Failed to fetch Pokemon details");
+      try {
+        // Batch fetch Pokemon details
+        const pokemonDetailsRequests = fetchData.results.map(
+          async (pokemon) => {
+            if (fetchedPokemonData[pokemon.url]) {
+              // Use cached data if available
+              pokemonDetails.push(fetchedPokemonData[pokemon.url]);
+            } else {
+              return fetch(pokemon.url)
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error("Failed to fetch Pokemon details");
+                  }
+                  return response.json();
+                })
+                .then((pokemonData) => {
+                  const formattedOrder = String(pokemonData.id).padStart(
+                    3,
+                    "0"
+                  );
+                  pokemonData.dexNumber = formattedOrder;
+                  pokemonData.spriteDisplay =
+                    pokemonData.sprites.other["official-artwork"].front_default;
+
+                  if (pokemonData.dexNumber.length !== 5) {
+                    pokemonDetails.push(pokemonData);
+                    fetchedPokemonData[pokemon.url] = pokemonData; // Cache fetched data
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error fetching Pokemon details:", error);
+                });
+            }
           }
-          const pokemonData = await pokemonResponse.json();
-          const formattedOrder = String(pokemonData.id).padStart(3, "0");
+        );
 
-          pokemonData.dexNumber = formattedOrder;
-          pokemonData.spriteDisplay =
-            pokemonData.sprites.other["official-artwork"].front_default;
-
-          if (pokemonData.dexNumber.length !== 5) {
-            pokemonDetails.push(pokemonData);
-          }
-        } catch (error) {
-          setLoading(false);
-          console.error(`Error fetching details for ${pokemon.name}:`, error);
-        }
+        await Promise.allSettled(pokemonDetailsRequests);
+        setListPokemon(pokemonDetails.filter(Boolean)); // Filter out any undefined values
+      } catch (error) {
+        console.error("Error fetching Pokemon details:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-      setListPokemon(pokemonDetails);
     };
 
     if (fetchData.results) {
@@ -475,8 +497,13 @@ export default function Home() {
       <div className="w-full  flex items-center justify-center min-h-[30rem]">
         {loading ? (
           <div className="flex justify-center w-full item-center ">
-            <div className="flex items-center text-[10rem] text-white">
-              <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+            <div className=" flex-col fles justify-center">
+              <div className="flex justify-center items-center text-[10rem] text-white">
+                <AiOutlineLoading3Quarters className="animate-spin flex items-center" />
+              </div>
+              <div className="text-white mina-regular py-2 bg-pkdBlue rounded-md shadow-md bg-opacity-60 px-2 my-4">
+                First load might take a while...
+              </div>
             </div>
           </div>
         ) : (
@@ -487,7 +514,7 @@ export default function Home() {
                   {searchFailed} ...
                 </div>
               ) : (
-                <div className="w-full grid grid-cols-2 h-full  md:grid-cols-3 lg:grid-cols-5">
+                <div className="w-full grid grid-cols-2 h-full min-h-screen  md:grid-cols-3 lg:grid-cols-5">
                   {listPokemon.map((pokemon: any) => (
                     <div
                       key={pokemon.name}

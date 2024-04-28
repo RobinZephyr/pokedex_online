@@ -5,6 +5,11 @@ import Header from "@/components/home/Header";
 export const metadata: Metadata = {
   title: "Pokedex",
   description: "by: Rubean Rakeru C. Esguerra",
+  icons: {
+    icon: ["/favicon.ico?=v4"],
+    apple: ["/apple-touch-icon.png?v=4"],
+    shortcut: ["/apple-touch-icon.png"],
+  },
 };
 
 export default function RootLayout({
